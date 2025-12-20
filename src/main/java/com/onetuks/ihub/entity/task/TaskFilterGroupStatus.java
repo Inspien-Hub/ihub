@@ -13,11 +13,15 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "task_filter_group_statuses", uniqueConstraints = {
     @UniqueConstraint(name = "unq_group_status", columnNames = {"group_id", "status_type"})})
+@Getter
+@Setter
 @RequiredArgsConstructor
 public class TaskFilterGroupStatus {
 

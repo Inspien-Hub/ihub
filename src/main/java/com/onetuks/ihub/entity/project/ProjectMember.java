@@ -14,11 +14,15 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "project_members", uniqueConstraints = {
     @UniqueConstraint(name = "unq_project_user", columnNames = {"project_id", "user_id"})})
+@Getter
+@Setter
 @RequiredArgsConstructor
 public class ProjectMember {
 

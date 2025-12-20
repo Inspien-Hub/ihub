@@ -12,12 +12,16 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.Map;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "interface_revisions")
+@Getter
+@Setter
 @RequiredArgsConstructor
 public class InterfaceRevision {
 

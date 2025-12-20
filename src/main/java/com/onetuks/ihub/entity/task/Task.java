@@ -16,10 +16,14 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "tasks")
+@Getter
+@Setter
 @RequiredArgsConstructor
 public class Task {
 

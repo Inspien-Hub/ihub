@@ -1,0 +1,51 @@
+package com.onetuks.ihub.controller.connection;
+
+import com.onetuks.ihub.dto.connection.ConnectionCreateRequest;
+import com.onetuks.ihub.dto.connection.ConnectionResponse;
+import com.onetuks.ihub.dto.connection.ConnectionUpdateRequest;
+import com.onetuks.ihub.service.connection.ConnectionService;
+import jakarta.validation.Valid;
+import java.net.URI;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequiredArgsConstructor
+public class ConnectionRestControllerImpl implements ConnectionRestController {
+
+  private final ConnectionService connectionService;
+
+  @Override
+  public ResponseEntity<ConnectionResponse> createConnection(
+      @Valid @RequestBody ConnectionCreateRequest request) {
+    ConnectionResponse response = connectionService.create(request);
+    return ResponseEntity.created(URI.create("/api/connections/" + response.connectionId()))
+        .body(response);
+  }
+
+  @Override
+  public ResponseEntity<ConnectionResponse> getConnection(@PathVariable Long connectionId) {
+    return ResponseEntity.ok(connectionService.getById(connectionId));
+  }
+
+  @Override
+  public ResponseEntity<List<ConnectionResponse>> getConnections() {
+    return ResponseEntity.ok(connectionService.getAll());
+  }
+
+  @Override
+  public ResponseEntity<ConnectionResponse> updateConnection(
+      @PathVariable Long connectionId, @Valid @RequestBody ConnectionUpdateRequest request) {
+    return ResponseEntity.ok(connectionService.update(connectionId, request));
+  }
+
+  @Override
+  public ResponseEntity<Void> deleteConnection(@PathVariable Long connectionId) {
+    connectionService.delete(connectionId);
+    return ResponseEntity.noContent().build();
+  }
+}
