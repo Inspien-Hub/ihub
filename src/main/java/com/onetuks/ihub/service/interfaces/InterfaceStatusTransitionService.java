@@ -1,7 +1,6 @@
 package com.onetuks.ihub.service.interfaces;
 
 import com.onetuks.ihub.dto.interfaces.InterfaceStatusTransitionCreateRequest;
-import com.onetuks.ihub.dto.interfaces.InterfaceStatusTransitionResponse;
 import com.onetuks.ihub.dto.interfaces.InterfaceStatusTransitionUpdateRequest;
 import com.onetuks.ihub.entity.interfaces.InterfaceStatus;
 import com.onetuks.ihub.entity.interfaces.InterfaceStatusTransition;
@@ -28,7 +27,7 @@ public class InterfaceStatusTransitionService {
   private final UserJpaRepository userJpaRepository;
 
   @Transactional
-  public InterfaceStatusTransitionResponse create(
+  public InterfaceStatusTransition create(
       InterfaceStatusTransitionCreateRequest request) {
     InterfaceStatusTransition transition = new InterfaceStatusTransition();
     InterfaceStatusTransitionMapper.applyCreate(transition, request);
@@ -36,24 +35,21 @@ public class InterfaceStatusTransitionService {
     transition.setFromStatus(findStatus(request.fromStatusId()));
     transition.setToStatus(findStatus(request.toStatusId()));
     transition.setCreatedBy(findUser(request.createdById()));
-    InterfaceStatusTransition saved = interfaceStatusTransitionJpaRepository.save(transition);
-    return InterfaceStatusTransitionMapper.toResponse(saved);
+    return interfaceStatusTransitionJpaRepository.save(transition);
   }
 
   @Transactional(readOnly = true)
-  public InterfaceStatusTransitionResponse getById(Long transitionId) {
-    return InterfaceStatusTransitionMapper.toResponse(findEntity(transitionId));
+  public InterfaceStatusTransition getById(Long transitionId) {
+    return findEntity(transitionId);
   }
 
   @Transactional(readOnly = true)
-  public List<InterfaceStatusTransitionResponse> getAll() {
-    return interfaceStatusTransitionJpaRepository.findAll().stream()
-        .map(InterfaceStatusTransitionMapper::toResponse)
-        .toList();
+  public List<InterfaceStatusTransition> getAll() {
+    return interfaceStatusTransitionJpaRepository.findAll();
   }
 
   @Transactional
-  public InterfaceStatusTransitionResponse update(
+  public InterfaceStatusTransition update(
       Long transitionId, InterfaceStatusTransitionUpdateRequest request) {
     InterfaceStatusTransition transition = findEntity(transitionId);
     InterfaceStatusTransitionMapper.applyUpdate(transition, request);
@@ -63,7 +59,7 @@ public class InterfaceStatusTransitionService {
     if (request.toStatusId() != null) {
       transition.setToStatus(findStatus(request.toStatusId()));
     }
-    return InterfaceStatusTransitionMapper.toResponse(transition);
+    return transition;
   }
 
   @Transactional

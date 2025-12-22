@@ -5,9 +5,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public record TaskFilterGroupResponse(
-    Long groupId,
-    Long userId,
-    Long projectId,
+    String groupId,
+    String userId,
+    String projectId,
     String name,
     String assigneeKeyword,
     String authorKeyword,

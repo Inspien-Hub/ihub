@@ -11,6 +11,7 @@ import com.onetuks.ihub.dto.file.FolderUpdateRequest;
 import com.onetuks.ihub.entity.file.Folder;
 import com.onetuks.ihub.entity.project.Project;
 import com.onetuks.ihub.entity.user.User;
+import com.onetuks.ihub.mapper.FolderMapper;
 import com.onetuks.ihub.repository.FolderJpaRepository;
 import com.onetuks.ihub.repository.ProjectJpaRepository;
 import com.onetuks.ihub.repository.UserJpaRepository;
@@ -63,7 +64,7 @@ class FolderServiceTest {
         "Root",
         creator.getUserId());
 
-    FolderResponse response = folderService.create(request);
+    FolderResponse response = FolderMapper.toResponse(folderService.create(request));
 
     assertNotNull(response.folderId());
     assertEquals("Root", response.name());
@@ -72,11 +73,11 @@ class FolderServiceTest {
 
   @Test
   void updateFolder_success() {
-    FolderResponse created = folderService.create(new FolderCreateRequest(
-        project.getProjectId(), null, "Parent", creator.getUserId()));
-    FolderUpdateRequest updateRequest = new FolderUpdateRequest("ParentRenamed", null);
+    FolderResponse created = FolderMapper.toResponse(folderService.create(new FolderCreateRequest(
+        project.getProjectId(), null, "Parent", creator.getUserId())));
+    FolderUpdateRequest updateRequest = new FolderUpdateRequest(null, "ParentRenamed");
 
-    FolderResponse updated = folderService.update(created.folderId(), updateRequest);
+    FolderResponse updated = FolderMapper.toResponse(folderService.update(created.folderId(), updateRequest));
 
     assertEquals("ParentRenamed", updated.name());
   }
@@ -93,8 +94,8 @@ class FolderServiceTest {
 
   @Test
   void deleteFolder_success() {
-    FolderResponse created = folderService.create(new FolderCreateRequest(
-        project.getProjectId(), null, "Del", creator.getUserId()));
+    FolderResponse created = FolderMapper.toResponse(folderService.create(new FolderCreateRequest(
+        project.getProjectId(), null, "Del", creator.getUserId())));
 
     folderService.delete(created.folderId());
 

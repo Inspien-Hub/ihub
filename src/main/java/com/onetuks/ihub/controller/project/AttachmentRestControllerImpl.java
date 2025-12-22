@@ -3,6 +3,7 @@ package com.onetuks.ihub.controller.project;
 import com.onetuks.ihub.dto.project.AttachmentCreateRequest;
 import com.onetuks.ihub.dto.project.AttachmentResponse;
 import com.onetuks.ihub.dto.project.AttachmentUpdateRequest;
+import com.onetuks.ihub.mapper.AttachmentMapper;
 import com.onetuks.ihub.service.project.AttachmentService;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -22,25 +23,27 @@ public class AttachmentRestControllerImpl implements AttachmentRestController {
   @Override
   public ResponseEntity<AttachmentResponse> createAttachment(
       @Valid @RequestBody AttachmentCreateRequest request) {
-    AttachmentResponse response = attachmentService.create(request);
+    AttachmentResponse response = AttachmentMapper.toResponse(attachmentService.create(request));
     return ResponseEntity.created(URI.create("/api/attachments/" + response.attachmentId()))
         .body(response);
   }
 
   @Override
   public ResponseEntity<AttachmentResponse> getAttachment(@PathVariable Long attachmentId) {
-    return ResponseEntity.ok(attachmentService.getById(attachmentId));
+    return ResponseEntity.ok(AttachmentMapper.toResponse(attachmentService.getById(attachmentId)));
   }
 
   @Override
   public ResponseEntity<List<AttachmentResponse>> getAttachments() {
-    return ResponseEntity.ok(attachmentService.getAll());
+    return ResponseEntity.ok(
+        attachmentService.getAll().stream().map(AttachmentMapper::toResponse).toList());
   }
 
   @Override
   public ResponseEntity<AttachmentResponse> updateAttachment(
       @PathVariable Long attachmentId, @Valid @RequestBody AttachmentUpdateRequest request) {
-    return ResponseEntity.ok(attachmentService.update(attachmentId, request));
+    return ResponseEntity.ok(
+        AttachmentMapper.toResponse(attachmentService.update(attachmentId, request)));
   }
 
   @Override

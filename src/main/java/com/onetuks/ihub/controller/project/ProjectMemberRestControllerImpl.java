@@ -3,6 +3,7 @@ package com.onetuks.ihub.controller.project;
 import com.onetuks.ihub.dto.project.ProjectMemberCreateRequest;
 import com.onetuks.ihub.dto.project.ProjectMemberResponse;
 import com.onetuks.ihub.dto.project.ProjectMemberUpdateRequest;
+import com.onetuks.ihub.mapper.ProjectMemberMapper;
 import com.onetuks.ihub.service.project.ProjectMemberService;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -22,25 +23,29 @@ public class ProjectMemberRestControllerImpl implements ProjectMemberRestControl
   @Override
   public ResponseEntity<ProjectMemberResponse> createProjectMember(
       @Valid @RequestBody ProjectMemberCreateRequest request) {
-    ProjectMemberResponse response = projectMemberService.create(request);
+    ProjectMemberResponse response = ProjectMemberMapper.toResponse(
+        projectMemberService.create(request));
     return ResponseEntity.created(URI.create("/api/project-members/" + response.projectMemberId()))
         .body(response);
   }
 
   @Override
   public ResponseEntity<ProjectMemberResponse> getProjectMember(Long projectMemberId) {
-    return ResponseEntity.ok(projectMemberService.getById(projectMemberId));
+    return ResponseEntity.ok(
+        ProjectMemberMapper.toResponse(projectMemberService.getById(projectMemberId)));
   }
 
   @Override
   public ResponseEntity<List<ProjectMemberResponse>> getProjectMembers() {
-    return ResponseEntity.ok(projectMemberService.getAll());
+    return ResponseEntity.ok(
+        projectMemberService.getAll().stream().map(ProjectMemberMapper::toResponse).toList());
   }
 
   @Override
   public ResponseEntity<ProjectMemberResponse> updateProjectMember(
       Long projectMemberId, @Valid @RequestBody ProjectMemberUpdateRequest request) {
-    return ResponseEntity.ok(projectMemberService.update(projectMemberId, request));
+    return ResponseEntity.ok(
+        ProjectMemberMapper.toResponse(projectMemberService.update(projectMemberId, request)));
   }
 
   @Override

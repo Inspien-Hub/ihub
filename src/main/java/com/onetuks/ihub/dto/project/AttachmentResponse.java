@@ -4,12 +4,12 @@ import com.onetuks.ihub.entity.communication.TargetType;
 import java.time.LocalDateTime;
 
 public record AttachmentResponse(
-    Long attachmentId,
-    Long projectId,
-    Long fileId,
+    String attachmentId,
+    String projectId,
+    String fileId,
     TargetType targetType,
-    Long targetId,
-    Long attachedById,
+    String targetId,
+    String attachedById,
     LocalDateTime attachedAt
 ) {
 }

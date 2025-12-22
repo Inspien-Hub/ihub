@@ -1,7 +1,6 @@
 package com.onetuks.ihub.service.project;
 
 import com.onetuks.ihub.dto.project.AttachmentCreateRequest;
-import com.onetuks.ihub.dto.project.AttachmentResponse;
 import com.onetuks.ihub.dto.project.AttachmentUpdateRequest;
 import com.onetuks.ihub.entity.file.File;
 import com.onetuks.ihub.entity.project.Attachment;
@@ -28,30 +27,27 @@ public class AttachmentService {
   private final UserJpaRepository userJpaRepository;
 
   @Transactional
-  public AttachmentResponse create(AttachmentCreateRequest request) {
+  public Attachment create(AttachmentCreateRequest request) {
     Attachment attachment = new Attachment();
     AttachmentMapper.applyCreate(attachment, request);
     attachment.setProject(findProject(request.projectId()));
     attachment.setFile(findFile(request.fileId()));
     attachment.setAttachedBy(findUser(request.attachedById()));
-    Attachment saved = attachmentJpaRepository.save(attachment);
-    return AttachmentMapper.toResponse(saved);
+    return attachmentJpaRepository.save(attachment);
   }
 
   @Transactional(readOnly = true)
-  public AttachmentResponse getById(Long attachmentId) {
-    return AttachmentMapper.toResponse(findEntity(attachmentId));
+  public Attachment getById(Long attachmentId) {
+    return findEntity(attachmentId);
   }
 
   @Transactional(readOnly = true)
-  public List<AttachmentResponse> getAll() {
-    return attachmentJpaRepository.findAll().stream()
-        .map(AttachmentMapper::toResponse)
-        .toList();
+  public List<Attachment> getAll() {
+    return attachmentJpaRepository.findAll();
   }
 
   @Transactional
-  public AttachmentResponse update(Long attachmentId, AttachmentUpdateRequest request) {
+  public Attachment update(Long attachmentId, AttachmentUpdateRequest request) {
     Attachment attachment = findEntity(attachmentId);
     AttachmentMapper.applyUpdate(attachment, request);
     if (request.fileId() != null) {
@@ -60,7 +56,7 @@ public class AttachmentService {
     if (request.attachedById() != null) {
       attachment.setAttachedBy(findUser(request.attachedById()));
     }
-    return AttachmentMapper.toResponse(attachment);
+    return attachment;
   }
 
   @Transactional

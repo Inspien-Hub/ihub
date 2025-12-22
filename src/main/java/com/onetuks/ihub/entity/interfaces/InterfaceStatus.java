@@ -4,8 +4,6 @@ import com.onetuks.ihub.entity.project.Project;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -23,9 +21,8 @@ import lombok.Setter;
 public class InterfaceStatus {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "status_id", nullable = false)
-  private Long statusId;
+  private String statusId;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "project_id", referencedColumnName = "project_id", nullable = false)

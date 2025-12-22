@@ -1,7 +1,6 @@
 package com.onetuks.ihub.service.event;
 
 import com.onetuks.ihub.dto.event.EventCreateRequest;
-import com.onetuks.ihub.dto.event.EventResponse;
 import com.onetuks.ihub.dto.event.EventUpdateRequest;
 import com.onetuks.ihub.entity.event.Event;
 import com.onetuks.ihub.entity.project.Project;
@@ -25,34 +24,31 @@ public class EventService {
   private final UserJpaRepository userJpaRepository;
 
   @Transactional
-  public EventResponse create(EventCreateRequest request) {
+  public Event create(EventCreateRequest request) {
     Event event = new Event();
     EventMapper.applyCreate(event, request);
     event.setProject(findProject(request.projectId()));
     if (request.createdById() != null) {
       event.setCreatedBy(findUser(request.createdById()));
     }
-    Event saved = eventJpaRepository.save(event);
-    return EventMapper.toResponse(saved);
+    return eventJpaRepository.save(event);
   }
 
   @Transactional(readOnly = true)
-  public EventResponse getById(Long eventId) {
-    return EventMapper.toResponse(findEntity(eventId));
+  public Event getById(Long eventId) {
+    return findEntity(eventId);
   }
 
   @Transactional(readOnly = true)
-  public List<EventResponse> getAll() {
-    return eventJpaRepository.findAll().stream()
-        .map(EventMapper::toResponse)
-        .toList();
+  public List<Event> getAll() {
+    return eventJpaRepository.findAll();
   }
 
   @Transactional
-  public EventResponse update(Long eventId, EventUpdateRequest request) {
+  public Event update(Long eventId, EventUpdateRequest request) {
     Event event = findEntity(eventId);
     EventMapper.applyUpdate(event, request);
-    return EventMapper.toResponse(event);
+    return event;
   }
 
   @Transactional

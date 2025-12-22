@@ -4,15 +4,15 @@ import com.onetuks.ihub.entity.file.FileStatus;
 import java.time.LocalDateTime;
 
 public record FileResponse(
-    Long fileId,
-    Long projectId,
-    Long folderId,
+    String fileId,
+    String projectId,
+    String folderId,
     FileStatus status,
     String originalName,
     String storedName,
     Long sizeBytes,
     String mimeType,
-    Long uploadedById,
+    String uploadedById,
     LocalDateTime uploadedAt,
     LocalDateTime deletedAt
 ) {

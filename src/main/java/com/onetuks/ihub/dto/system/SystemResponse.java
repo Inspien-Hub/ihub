@@ -6,15 +6,15 @@ import com.onetuks.ihub.entity.system.SystemType;
 import java.time.LocalDateTime;
 
 public record SystemResponse(
-    Long systemId,
-    Long projectId,
+    String systemId,
+    String projectId,
     String systemCode,
     SystemStatus status,
     String description,
     SystemType systemType,
     SystemEnvironment environment,
-    Long createdById,
-    Long updatedById,
+    String createdById,
+    String updatedById,
     LocalDateTime createdAt,
     LocalDateTime updatedAt
 ) {

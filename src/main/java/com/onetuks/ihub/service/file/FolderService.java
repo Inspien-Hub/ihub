@@ -1,7 +1,6 @@
 package com.onetuks.ihub.service.file;
 
 import com.onetuks.ihub.dto.file.FolderCreateRequest;
-import com.onetuks.ihub.dto.file.FolderResponse;
 import com.onetuks.ihub.dto.file.FolderUpdateRequest;
 import com.onetuks.ihub.entity.file.Folder;
 import com.onetuks.ihub.entity.project.Project;
@@ -25,7 +24,7 @@ public class FolderService {
   private final UserJpaRepository userJpaRepository;
 
   @Transactional
-  public FolderResponse create(FolderCreateRequest request) {
+  public Folder create(FolderCreateRequest request) {
     Folder folder = new Folder();
     FolderMapper.applyCreate(folder, request);
     folder.setProject(findProject(request.projectId()));
@@ -35,30 +34,27 @@ public class FolderService {
     if (request.createdById() != null) {
       folder.setCreatedBy(findUser(request.createdById()));
     }
-    Folder saved = folderJpaRepository.save(folder);
-    return FolderMapper.toResponse(saved);
+    return folderJpaRepository.save(folder);
   }
 
   @Transactional(readOnly = true)
-  public FolderResponse getById(Long folderId) {
-    return FolderMapper.toResponse(findEntity(folderId));
+  public Folder getById(Long folderId) {
+    return findEntity(folderId);
   }
 
   @Transactional(readOnly = true)
-  public List<FolderResponse> getAll() {
-    return folderJpaRepository.findAll().stream()
-        .map(FolderMapper::toResponse)
-        .toList();
+  public List<Folder> getAll() {
+    return folderJpaRepository.findAll();
   }
 
   @Transactional
-  public FolderResponse update(Long folderId, FolderUpdateRequest request) {
+  public Folder update(Long folderId, FolderUpdateRequest request) {
     Folder folder = findEntity(folderId);
     FolderMapper.applyUpdate(folder, request);
     if (request.parentFolderId() != null) {
       folder.setParentFolder(findFolder(request.parentFolderId()));
     }
-    return FolderMapper.toResponse(folder);
+    return folder;
   }
 
   @Transactional

@@ -1,7 +1,6 @@
 package com.onetuks.ihub.service.communication;
 
 import com.onetuks.ihub.dto.communication.CommentCreateRequest;
-import com.onetuks.ihub.dto.communication.CommentResponse;
 import com.onetuks.ihub.dto.communication.CommentUpdateRequest;
 import com.onetuks.ihub.entity.communication.Comment;
 import com.onetuks.ihub.entity.project.Project;
@@ -25,7 +24,7 @@ public class CommentService {
   private final UserJpaRepository userJpaRepository;
 
   @Transactional
-  public CommentResponse create(CommentCreateRequest request) {
+  public Comment create(CommentCreateRequest request) {
     Comment comment = new Comment();
     CommentMapper.applyCreate(comment, request);
     comment.setProject(findProject(request.projectId()));
@@ -35,27 +34,24 @@ public class CommentService {
     if (request.createdById() != null) {
       comment.setCreatedBy(findUser(request.createdById()));
     }
-    Comment saved = commentJpaRepository.save(comment);
-    return CommentMapper.toResponse(saved);
+    return commentJpaRepository.save(comment);
   }
 
   @Transactional(readOnly = true)
-  public CommentResponse getById(Long commentId) {
-    return CommentMapper.toResponse(findEntity(commentId));
+  public Comment getById(Long commentId) {
+    return findEntity(commentId);
   }
 
   @Transactional(readOnly = true)
-  public List<CommentResponse> getAll() {
-    return commentJpaRepository.findAll().stream()
-        .map(CommentMapper::toResponse)
-        .toList();
+  public List<Comment> getAll() {
+    return commentJpaRepository.findAll();
   }
 
   @Transactional
-  public CommentResponse update(Long commentId, CommentUpdateRequest request) {
+  public Comment update(Long commentId, CommentUpdateRequest request) {
     Comment comment = findEntity(commentId);
     CommentMapper.applyUpdate(comment, request);
-    return CommentMapper.toResponse(comment);
+    return comment;
   }
 
   @Transactional

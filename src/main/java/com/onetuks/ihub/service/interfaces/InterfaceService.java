@@ -1,7 +1,6 @@
 package com.onetuks.ihub.service.interfaces;
 
 import com.onetuks.ihub.dto.interfaces.InterfaceCreateRequest;
-import com.onetuks.ihub.dto.interfaces.InterfaceResponse;
 import com.onetuks.ihub.dto.interfaces.InterfaceUpdateRequest;
 import com.onetuks.ihub.entity.interfaces.Interface;
 import com.onetuks.ihub.entity.interfaces.InterfaceStatus;
@@ -31,7 +30,7 @@ public class InterfaceService {
   private final UserJpaRepository userJpaRepository;
 
   @Transactional
-  public InterfaceResponse create(InterfaceCreateRequest request) {
+  public Interface create(InterfaceCreateRequest request) {
     Interface anInterface = new Interface();
     InterfaceMapper.applyCreate(anInterface, request);
     anInterface.setProject(findProject(request.projectId()));
@@ -39,24 +38,21 @@ public class InterfaceService {
     anInterface.setTargetSystem(findSystem(request.targetSystemId()));
     anInterface.setStatus(findStatus(request.statusId()));
     anInterface.setCreatedBy(findUser(request.createdById()));
-    Interface saved = interfaceJpaRepository.save(anInterface);
-    return InterfaceMapper.toResponse(saved);
+    return interfaceJpaRepository.save(anInterface);
   }
 
   @Transactional(readOnly = true)
-  public InterfaceResponse getById(Long interfaceId) {
-    return InterfaceMapper.toResponse(findEntity(interfaceId));
+  public Interface getById(Long interfaceId) {
+    return findEntity(interfaceId);
   }
 
   @Transactional(readOnly = true)
-  public List<InterfaceResponse> getAll() {
-    return interfaceJpaRepository.findAll().stream()
-        .map(InterfaceMapper::toResponse)
-        .toList();
+  public List<Interface> getAll() {
+    return interfaceJpaRepository.findAll();
   }
 
   @Transactional
-  public InterfaceResponse update(Long interfaceId, InterfaceUpdateRequest request) {
+  public Interface update(Long interfaceId, InterfaceUpdateRequest request) {
     Interface anInterface = findEntity(interfaceId);
     InterfaceMapper.applyUpdate(anInterface, request);
     if (request.sourceSystemId() != null) {
@@ -68,7 +64,7 @@ public class InterfaceService {
     if (request.statusId() != null) {
       anInterface.setStatus(findStatus(request.statusId()));
     }
-    return InterfaceMapper.toResponse(anInterface);
+    return anInterface;
   }
 
   @Transactional

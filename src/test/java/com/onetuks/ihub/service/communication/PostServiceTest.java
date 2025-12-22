@@ -10,6 +10,7 @@ import com.onetuks.ihub.dto.communication.PostResponse;
 import com.onetuks.ihub.dto.communication.PostUpdateRequest;
 import com.onetuks.ihub.entity.project.Project;
 import com.onetuks.ihub.entity.user.User;
+import com.onetuks.ihub.mapper.PostMapper;
 import com.onetuks.ihub.repository.PostJpaRepository;
 import com.onetuks.ihub.repository.ProjectJpaRepository;
 import com.onetuks.ihub.repository.UserJpaRepository;
@@ -62,7 +63,7 @@ class PostServiceTest {
         "Content",
         author.getUserId());
 
-    PostResponse response = postService.create(request);
+    PostResponse response = PostMapper.toResponse(postService.create(request));
 
     assertNotNull(response.postId());
     assertEquals("Title", response.title());
@@ -71,12 +72,12 @@ class PostServiceTest {
 
   @Test
   void updatePost_success() {
-    PostResponse created = postService.create(new PostCreateRequest(
-        project.getProjectId(), "Old", "Old content", author.getUserId()));
+    PostResponse created = PostMapper.toResponse(postService.create(new PostCreateRequest(
+        project.getProjectId(), "Old", "Old content", author.getUserId())));
 
     PostUpdateRequest updateRequest = new PostUpdateRequest("New", "New content");
 
-    PostResponse updated = postService.update(created.postId(), updateRequest);
+    PostResponse updated = PostMapper.toResponse(postService.update(created.postId(), updateRequest));
 
     assertEquals("New", updated.title());
     assertEquals("New content", updated.content());
@@ -94,8 +95,8 @@ class PostServiceTest {
 
   @Test
   void deletePost_success() {
-    PostResponse created = postService.create(new PostCreateRequest(
-        project.getProjectId(), "P3", "C3", author.getUserId()));
+    PostResponse created = PostMapper.toResponse(postService.create(new PostCreateRequest(
+        project.getProjectId(), "P3", "C3", author.getUserId())));
 
     postService.delete(created.postId());
 

@@ -8,6 +8,8 @@ import com.onetuks.ihub.TestcontainersConfiguration;
 import com.onetuks.ihub.dto.interfaces.InterfaceCreateRequest;
 import com.onetuks.ihub.dto.interfaces.InterfaceResponse;
 import com.onetuks.ihub.dto.interfaces.InterfaceUpdateRequest;
+import com.onetuks.ihub.entity.interfaces.ChannelAdapter;
+import com.onetuks.ihub.entity.interfaces.Interface;
 import com.onetuks.ihub.entity.interfaces.InterfaceStatus;
 import com.onetuks.ihub.entity.interfaces.InterfaceType;
 import com.onetuks.ihub.entity.interfaces.SyncAsyncType;
@@ -16,6 +18,7 @@ import com.onetuks.ihub.entity.system.SystemEnvironment;
 import com.onetuks.ihub.entity.system.SystemStatus;
 import com.onetuks.ihub.entity.system.SystemType;
 import com.onetuks.ihub.entity.user.User;
+import com.onetuks.ihub.mapper.InterfaceMapper;
 import com.onetuks.ihub.repository.InterfaceJpaRepository;
 import com.onetuks.ihub.repository.InterfaceStatusJpaRepository;
 import com.onetuks.ihub.repository.ProjectJpaRepository;
@@ -23,12 +26,15 @@ import com.onetuks.ihub.repository.SystemJpaRepository;
 import com.onetuks.ihub.repository.UserJpaRepository;
 import com.onetuks.ihub.service.ServiceTestDataFactory;
 import jakarta.persistence.EntityNotFoundException;
+import java.util.List;
+import java.util.stream.IntStream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.testcontainers.shaded.org.checkerframework.common.value.qual.IntRange;
 
 @SpringBootTest
 @Import(TestcontainersConfiguration.class)
@@ -67,8 +73,10 @@ class InterfaceServiceTest {
         systemJpaRepository, project, user, user, "SRC");
     targetSystem = ServiceTestDataFactory.createSystem(
         systemJpaRepository, project, user, user, "TGT");
-    status = ServiceTestDataFactory.createInterfaceStatus(interfaceStatusJpaRepository, project, "Draft", 1);
-    newStatus = ServiceTestDataFactory.createInterfaceStatus(interfaceStatusJpaRepository, project, "Live", 2);
+    status = ServiceTestDataFactory.createInterfaceStatus(interfaceStatusJpaRepository, project,
+        "Draft", 1);
+    newStatus = ServiceTestDataFactory.createInterfaceStatus(interfaceStatusJpaRepository, project,
+        "Live", 2);
   }
 
   @AfterEach
@@ -98,7 +106,7 @@ class InterfaceServiceTest {
         "remark",
         user.getUserId());
 
-    InterfaceResponse response = interfaceService.create(request);
+    InterfaceResponse response = InterfaceMapper.toResponse(interfaceService.create(request));
 
     assertNotNull(response.interfaceId());
     assertEquals("IF-1", response.ifId());
@@ -107,12 +115,13 @@ class InterfaceServiceTest {
 
   @Test
   void updateInterface_success() {
-    InterfaceResponse created = interfaceService.create(new InterfaceCreateRequest(
-        project.getProjectId(), "IF-2", sourceSystem.getSystemId(), targetSystem.getSystemId(),
-        "Module", InterfaceType.REALTIME, "pattern",
-        com.onetuks.ihub.entity.interfaces.ChannelAdapter.HTTP,
-        com.onetuks.ihub.entity.interfaces.ChannelAdapter.REST,
-        SyncAsyncType.SYNC, status.getStatusId(), "batch", "remark", user.getUserId()));
+    InterfaceResponse created = InterfaceMapper.toResponse(
+        interfaceService.create(new InterfaceCreateRequest(
+            project.getProjectId(), "IF-2", sourceSystem.getSystemId(), targetSystem.getSystemId(),
+            "Module", InterfaceType.REALTIME, "pattern",
+            com.onetuks.ihub.entity.interfaces.ChannelAdapter.HTTP,
+            com.onetuks.ihub.entity.interfaces.ChannelAdapter.REST,
+            SyncAsyncType.SYNC, status.getStatusId(), "batch", "remark", user.getUserId())));
 
     InterfaceUpdateRequest updateRequest = new InterfaceUpdateRequest(
         "IF-2-NEW",
@@ -128,7 +137,8 @@ class InterfaceServiceTest {
         "batch2",
         "remark2");
 
-    InterfaceResponse updated = interfaceService.update(created.interfaceId(), updateRequest);
+    InterfaceResponse updated =
+        InterfaceMapper.toResponse(interfaceService.update(created.interfaceId(), updateRequest));
 
     assertEquals("IF-2-NEW", updated.ifId());
     assertEquals(InterfaceType.BATCH, updated.interfaceType());
@@ -137,17 +147,25 @@ class InterfaceServiceTest {
 
   @Test
   void getInterfaces_returnsAll() {
-    interfaceService.create(new InterfaceCreateRequest(
+    List<Interface> interfaces = IntStream.range(0, 2)
+        .mapToObj(i -> new Interface(
+            project, "IF-" + i, sourceSystem, targetSystem, "M", InterfaceType.REALTIME, "p",
+            ChannelAdapter.HTTP, ChannelAdapter.HTTP, SyncAsyncType.SYNC,
+            status, "b", "r", user
+        ))
+            .toList()
+    interfaceJpaRepository.saveAll()
+    Interface anInterface = interfaceService.create(new InterfaceCreateRequest(
         project.getProjectId(), "IF-3", sourceSystem.getSystemId(), targetSystem.getSystemId(),
         "M", InterfaceType.REALTIME, "p",
-        com.onetuks.ihub.entity.interfaces.ChannelAdapter.HTTP,
-        com.onetuks.ihub.entity.interfaces.ChannelAdapter.HTTP,
+        ChannelAdapter.HTTP,
+        ChannelAdapter.HTTP,
         SyncAsyncType.SYNC, status.getStatusId(), "b", "r", user.getUserId()));
-    interfaceService.create(new InterfaceCreateRequest(
+    Interface anInterface1 = interfaceService.create(new InterfaceCreateRequest(
         project.getProjectId(), "IF-4", sourceSystem.getSystemId(), targetSystem.getSystemId(),
         "M", InterfaceType.REALTIME, "p",
-        com.onetuks.ihub.entity.interfaces.ChannelAdapter.HTTP,
-        com.onetuks.ihub.entity.interfaces.ChannelAdapter.HTTP,
+        ChannelAdapter.HTTP,
+        ChannelAdapter.HTTP,
         SyncAsyncType.SYNC, status.getStatusId(), "b", "r", user.getUserId()));
 
     assertEquals(2, interfaceService.getAll().size());
@@ -155,12 +173,13 @@ class InterfaceServiceTest {
 
   @Test
   void deleteInterface_success() {
-    InterfaceResponse created = interfaceService.create(new InterfaceCreateRequest(
-        project.getProjectId(), "IF-5", sourceSystem.getSystemId(), targetSystem.getSystemId(),
-        "M", InterfaceType.REALTIME, "p",
-        com.onetuks.ihub.entity.interfaces.ChannelAdapter.HTTP,
-        com.onetuks.ihub.entity.interfaces.ChannelAdapter.HTTP,
-        SyncAsyncType.SYNC, status.getStatusId(), "b", "r", user.getUserId()));
+    InterfaceResponse created = InterfaceMapper.toResponse(
+        interfaceService.create(new InterfaceCreateRequest(
+            project.getProjectId(), "IF-5", sourceSystem.getSystemId(), targetSystem.getSystemId(),
+            "M", InterfaceType.REALTIME, "p",
+            com.onetuks.ihub.entity.interfaces.ChannelAdapter.HTTP,
+            com.onetuks.ihub.entity.interfaces.ChannelAdapter.HTTP,
+            SyncAsyncType.SYNC, status.getStatusId(), "b", "r", user.getUserId())));
 
     interfaceService.delete(created.interfaceId());
 

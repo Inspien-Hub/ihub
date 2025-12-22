@@ -1,15 +1,13 @@
 package com.onetuks.ihub.entity.task;
 
 import com.onetuks.ihub.entity.interfaces.Interface;
-import com.onetuks.ihub.entity.user.User;
 import com.onetuks.ihub.entity.project.Project;
+import com.onetuks.ihub.entity.user.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -21,16 +19,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "tasks")
+@Table(name = Task.TABLE_NAME)
 @Getter
 @Setter
 @RequiredArgsConstructor
 public class Task {
 
+  public static final String TABLE_NAME = "tasks";
+
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "task_id", nullable = false)
-  private Long taskId;
+  private String taskId;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "project_id", referencedColumnName = "project_id", nullable = false)

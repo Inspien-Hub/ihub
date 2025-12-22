@@ -13,6 +13,7 @@ import com.onetuks.ihub.entity.system.SystemEnvironment;
 import com.onetuks.ihub.entity.system.SystemStatus;
 import com.onetuks.ihub.entity.system.SystemType;
 import com.onetuks.ihub.entity.user.User;
+import com.onetuks.ihub.mapper.SystemMapper;
 import com.onetuks.ihub.repository.ProjectJpaRepository;
 import com.onetuks.ihub.repository.SystemJpaRepository;
 import com.onetuks.ihub.repository.UserJpaRepository;
@@ -71,7 +72,7 @@ class SystemServiceTest {
         creator.getUserId(),
         updater.getUserId());
 
-    SystemResponse response = systemService.create(request);
+    SystemResponse response = SystemMapper.toResponse(systemService.create(request));
 
     assertNotNull(response.systemId());
     assertEquals("SYS1", response.systemCode());
@@ -82,7 +83,7 @@ class SystemServiceTest {
 
   @Test
   void updateSystem_success() {
-    SystemResponse created = systemService.create(new SystemCreateRequest(
+    SystemResponse created = SystemMapper.toResponse(systemService.create(new SystemCreateRequest(
         project.getProjectId(),
         "SYS2",
         SystemStatus.ACTIVE,
@@ -90,7 +91,7 @@ class SystemServiceTest {
         SystemType.SAP,
         SystemEnvironment.DEV,
         creator.getUserId(),
-        updater.getUserId()));
+        updater.getUserId())));
 
     SystemUpdateRequest updateRequest = new SystemUpdateRequest(
         "SYS2-NEW",
@@ -100,7 +101,7 @@ class SystemServiceTest {
         SystemEnvironment.QA,
         creator.getUserId());
 
-    SystemResponse updated = systemService.update(created.systemId(), updateRequest);
+    SystemResponse updated = SystemMapper.toResponse(systemService.update(created.systemId(), updateRequest));
 
     assertEquals("SYS2-NEW", updated.systemCode());
     assertEquals(SystemStatus.INACTIVE, updated.status());
@@ -121,9 +122,9 @@ class SystemServiceTest {
 
   @Test
   void deleteSystem_success() {
-    SystemResponse created = systemService.create(new SystemCreateRequest(
+    SystemResponse created = SystemMapper.toResponse(systemService.create(new SystemCreateRequest(
         project.getProjectId(), "S3", SystemStatus.ACTIVE, null,
-        SystemType.DB, SystemEnvironment.DEV, creator.getUserId(), updater.getUserId()));
+        SystemType.DB, SystemEnvironment.DEV, creator.getUserId(), updater.getUserId())));
 
     systemService.delete(created.systemId());
 

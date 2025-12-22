@@ -3,6 +3,7 @@ package com.onetuks.ihub.controller.communication;
 import com.onetuks.ihub.dto.communication.CommentCreateRequest;
 import com.onetuks.ihub.dto.communication.CommentResponse;
 import com.onetuks.ihub.dto.communication.CommentUpdateRequest;
+import com.onetuks.ihub.mapper.CommentMapper;
 import com.onetuks.ihub.service.communication.CommentService;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -22,25 +23,25 @@ public class CommentRestControllerImpl implements CommentRestController {
   @Override
   public ResponseEntity<CommentResponse> createComment(
       @Valid @RequestBody CommentCreateRequest request) {
-    CommentResponse response = commentService.create(request);
+    CommentResponse response = CommentMapper.toResponse(commentService.create(request));
     return ResponseEntity.created(URI.create("/api/comments/" + response.commentId()))
         .body(response);
   }
 
   @Override
   public ResponseEntity<CommentResponse> getComment(@PathVariable Long commentId) {
-    return ResponseEntity.ok(commentService.getById(commentId));
+    return ResponseEntity.ok(CommentMapper.toResponse(commentService.getById(commentId)));
   }
 
   @Override
   public ResponseEntity<List<CommentResponse>> getComments() {
-    return ResponseEntity.ok(commentService.getAll());
+    return ResponseEntity.ok(commentService.getAll().stream().map(CommentMapper::toResponse).toList());
   }
 
   @Override
   public ResponseEntity<CommentResponse> updateComment(
       @PathVariable Long commentId, @Valid @RequestBody CommentUpdateRequest request) {
-    return ResponseEntity.ok(commentService.update(commentId, request));
+    return ResponseEntity.ok(CommentMapper.toResponse(commentService.update(commentId, request)));
   }
 
   @Override

@@ -1,7 +1,6 @@
 package com.onetuks.ihub.service.task;
 
 import com.onetuks.ihub.dto.task.TaskFilterGroupStatusCreateRequest;
-import com.onetuks.ihub.dto.task.TaskFilterGroupStatusResponse;
 import com.onetuks.ihub.dto.task.TaskFilterGroupStatusUpdateRequest;
 import com.onetuks.ihub.entity.task.TaskFilterGroup;
 import com.onetuks.ihub.entity.task.TaskFilterGroupStatus;
@@ -22,32 +21,29 @@ public class TaskFilterGroupStatusService {
   private final TaskFilterGroupJpaRepository taskFilterGroupJpaRepository;
 
   @Transactional
-  public TaskFilterGroupStatusResponse create(TaskFilterGroupStatusCreateRequest request) {
+  public TaskFilterGroupStatus create(TaskFilterGroupStatusCreateRequest request) {
     TaskFilterGroupStatus status = new TaskFilterGroupStatus();
     TaskFilterGroupStatusMapper.applyCreate(status, request);
     status.setGroup(findGroup(request.groupId()));
-    TaskFilterGroupStatus saved = taskFilterGroupStatusJpaRepository.save(status);
-    return TaskFilterGroupStatusMapper.toResponse(saved);
+    return taskFilterGroupStatusJpaRepository.save(status);
   }
 
   @Transactional(readOnly = true)
-  public TaskFilterGroupStatusResponse getById(Long statusId) {
-    return TaskFilterGroupStatusMapper.toResponse(findEntity(statusId));
+  public TaskFilterGroupStatus getById(Long statusId) {
+    return findEntity(statusId);
   }
 
   @Transactional(readOnly = true)
-  public List<TaskFilterGroupStatusResponse> getAll() {
-    return taskFilterGroupStatusJpaRepository.findAll().stream()
-        .map(TaskFilterGroupStatusMapper::toResponse)
-        .toList();
+  public List<TaskFilterGroupStatus> getAll() {
+    return taskFilterGroupStatusJpaRepository.findAll();
   }
 
   @Transactional
-  public TaskFilterGroupStatusResponse update(
+  public TaskFilterGroupStatus update(
       Long statusId, TaskFilterGroupStatusUpdateRequest request) {
     TaskFilterGroupStatus status = findEntity(statusId);
     TaskFilterGroupStatusMapper.applyUpdate(status, request);
-    return TaskFilterGroupStatusMapper.toResponse(status);
+    return status;
   }
 
   @Transactional

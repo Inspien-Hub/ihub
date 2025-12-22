@@ -1,7 +1,6 @@
 package com.onetuks.ihub.service.task;
 
 import com.onetuks.ihub.dto.task.TaskCreateRequest;
-import com.onetuks.ihub.dto.task.TaskResponse;
 import com.onetuks.ihub.dto.task.TaskUpdateRequest;
 import com.onetuks.ihub.entity.interfaces.Interface;
 import com.onetuks.ihub.entity.project.Project;
@@ -28,7 +27,7 @@ public class TaskService {
   private final UserJpaRepository userJpaRepository;
 
   @Transactional
-  public TaskResponse create(TaskCreateRequest request) {
+  public Task create(TaskCreateRequest request) {
     Task task = new Task();
     TaskMapper.applyCreate(task, request);
     task.setProject(findProject(request.projectId()));
@@ -47,24 +46,21 @@ public class TaskService {
     if (request.createdById() != null) {
       task.setCreatedBy(findUser(request.createdById()));
     }
-    Task saved = taskJpaRepository.save(task);
-    return TaskMapper.toResponse(saved);
+    return taskJpaRepository.save(task);
   }
 
   @Transactional(readOnly = true)
-  public TaskResponse getById(Long taskId) {
-    return TaskMapper.toResponse(findEntity(taskId));
+  public Task getById(Long taskId) {
+    return findEntity(taskId);
   }
 
   @Transactional(readOnly = true)
-  public List<TaskResponse> getAll() {
-    return taskJpaRepository.findAll().stream()
-        .map(TaskMapper::toResponse)
-        .toList();
+  public List<Task> getAll() {
+    return taskJpaRepository.findAll();
   }
 
   @Transactional
-  public TaskResponse update(Long taskId, TaskUpdateRequest request) {
+  public Task update(Long taskId, TaskUpdateRequest request) {
     Task task = findEntity(taskId);
     TaskMapper.applyUpdate(task, request);
     if (request.parentTaskId() != null) {
@@ -79,7 +75,7 @@ public class TaskService {
     if (request.requesterId() != null) {
       task.setRequester(findUser(request.requesterId()));
     }
-    return TaskMapper.toResponse(task);
+    return task;
   }
 
   @Transactional

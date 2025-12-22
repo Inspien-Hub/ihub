@@ -1,7 +1,6 @@
 package com.onetuks.ihub.service.interfaces;
 
 import com.onetuks.ihub.dto.interfaces.InterfaceRevisionCreateRequest;
-import com.onetuks.ihub.dto.interfaces.InterfaceRevisionResponse;
 import com.onetuks.ihub.dto.interfaces.InterfaceRevisionUpdateRequest;
 import com.onetuks.ihub.entity.interfaces.Interface;
 import com.onetuks.ihub.entity.interfaces.InterfaceRevision;
@@ -25,35 +24,32 @@ public class InterfaceRevisionService {
   private final UserJpaRepository userJpaRepository;
 
   @Transactional
-  public InterfaceRevisionResponse create(InterfaceRevisionCreateRequest request) {
+  public InterfaceRevision create(InterfaceRevisionCreateRequest request) {
     InterfaceRevision revision = new InterfaceRevision();
     InterfaceRevisionMapper.applyCreate(revision, request);
     revision.setAnInterface(findInterface(request.interfaceId()));
     revision.setChangedBy(findUser(request.changedById()));
-    InterfaceRevision saved = interfaceRevisionJpaRepository.save(revision);
-    return InterfaceRevisionMapper.toResponse(saved);
+    return interfaceRevisionJpaRepository.save(revision);
   }
 
   @Transactional(readOnly = true)
-  public InterfaceRevisionResponse getById(Long revisionId) {
-    return InterfaceRevisionMapper.toResponse(findEntity(revisionId));
+  public InterfaceRevision getById(Long revisionId) {
+    return findEntity(revisionId);
   }
 
   @Transactional(readOnly = true)
-  public List<InterfaceRevisionResponse> getAll() {
-    return interfaceRevisionJpaRepository.findAll().stream()
-        .map(InterfaceRevisionMapper::toResponse)
-        .toList();
+  public List<InterfaceRevision> getAll() {
+    return interfaceRevisionJpaRepository.findAll();
   }
 
   @Transactional
-  public InterfaceRevisionResponse update(Long revisionId, InterfaceRevisionUpdateRequest request) {
+  public InterfaceRevision update(Long revisionId, InterfaceRevisionUpdateRequest request) {
     InterfaceRevision revision = findEntity(revisionId);
     InterfaceRevisionMapper.applyUpdate(revision, request);
     if (request.changedById() != null) {
       revision.setChangedBy(findUser(request.changedById()));
     }
-    return InterfaceRevisionMapper.toResponse(revision);
+    return revision;
   }
 
   @Transactional

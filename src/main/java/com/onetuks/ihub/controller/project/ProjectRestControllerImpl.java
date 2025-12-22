@@ -3,6 +3,7 @@ package com.onetuks.ihub.controller.project;
 import com.onetuks.ihub.dto.project.ProjectCreateRequest;
 import com.onetuks.ihub.dto.project.ProjectResponse;
 import com.onetuks.ihub.dto.project.ProjectUpdateRequest;
+import com.onetuks.ihub.mapper.ProjectMapper;
 import com.onetuks.ihub.service.project.ProjectService;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -22,26 +23,26 @@ public class ProjectRestControllerImpl implements ProjectRestController {
   @Override
   public ResponseEntity<ProjectResponse> createProject(
       @Valid @RequestBody ProjectCreateRequest request) {
-    ProjectResponse response = projectService.create(request);
+    ProjectResponse response = ProjectMapper.toResponse(projectService.create(request));
     return ResponseEntity.created(URI.create("/api/projects/" + response.projectId()))
         .body(response);
   }
 
   @Override
   public ResponseEntity<ProjectResponse> getProject(@PathVariable Long projectId) {
-    return ResponseEntity.ok(projectService.getById(projectId));
+    return ResponseEntity.ok(ProjectMapper.toResponse(projectService.getById(projectId)));
   }
 
   @Override
   public ResponseEntity<List<ProjectResponse>> getProjects() {
-    return ResponseEntity.ok(projectService.getAll());
+    return ResponseEntity.ok(projectService.getAll().stream().map(ProjectMapper::toResponse).toList());
   }
 
   @Override
   public ResponseEntity<ProjectResponse> updateProject(
       @PathVariable Long projectId,
       @Valid @RequestBody ProjectUpdateRequest request) {
-    return ResponseEntity.ok(projectService.update(projectId, request));
+    return ResponseEntity.ok(ProjectMapper.toResponse(projectService.update(projectId, request)));
   }
 
   @Override

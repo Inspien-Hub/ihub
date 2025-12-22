@@ -4,12 +4,12 @@ import com.onetuks.ihub.entity.communication.TargetType;
 import java.time.LocalDateTime;
 
 public record MentionResponse(
-    Long mentionId,
-    Long projectId,
+    String mentionId,
+    String projectId,
     TargetType targetType,
-    Long targetId,
-    Long mentionedUserId,
-    Long createdById,
+    String targetId,
+    String mentionedUserId,
+    String createdById,
     LocalDateTime createdAt
 ) {
 }

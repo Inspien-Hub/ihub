@@ -3,6 +3,7 @@ package com.onetuks.ihub.controller.task;
 import com.onetuks.ihub.dto.task.TaskFilterGroupCreateRequest;
 import com.onetuks.ihub.dto.task.TaskFilterGroupResponse;
 import com.onetuks.ihub.dto.task.TaskFilterGroupUpdateRequest;
+import com.onetuks.ihub.mapper.TaskFilterGroupMapper;
 import com.onetuks.ihub.service.task.TaskFilterGroupService;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -22,25 +23,28 @@ public class TaskFilterGroupRestControllerImpl implements TaskFilterGroupRestCon
   @Override
   public ResponseEntity<TaskFilterGroupResponse> createTaskFilterGroup(
       @Valid @RequestBody TaskFilterGroupCreateRequest request) {
-    TaskFilterGroupResponse response = taskFilterGroupService.create(request);
+    TaskFilterGroupResponse response = TaskFilterGroupMapper.toResponse(
+        taskFilterGroupService.create(request));
     return ResponseEntity.created(URI.create("/api/task-filter-groups/" + response.groupId()))
         .body(response);
   }
 
   @Override
   public ResponseEntity<TaskFilterGroupResponse> getTaskFilterGroup(@PathVariable Long groupId) {
-    return ResponseEntity.ok(taskFilterGroupService.getById(groupId));
+    return ResponseEntity.ok(TaskFilterGroupMapper.toResponse(taskFilterGroupService.getById(groupId)));
   }
 
   @Override
   public ResponseEntity<List<TaskFilterGroupResponse>> getTaskFilterGroups() {
-    return ResponseEntity.ok(taskFilterGroupService.getAll());
+    return ResponseEntity.ok(
+        taskFilterGroupService.getAll().stream().map(TaskFilterGroupMapper::toResponse).toList());
   }
 
   @Override
   public ResponseEntity<TaskFilterGroupResponse> updateTaskFilterGroup(
       @PathVariable Long groupId, @Valid @RequestBody TaskFilterGroupUpdateRequest request) {
-    return ResponseEntity.ok(taskFilterGroupService.update(groupId, request));
+    return ResponseEntity.ok(
+        TaskFilterGroupMapper.toResponse(taskFilterGroupService.update(groupId, request)));
   }
 
   @Override

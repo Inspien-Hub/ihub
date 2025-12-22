@@ -11,6 +11,7 @@ import com.onetuks.ihub.dto.communication.FeedItemUpdateRequest;
 import com.onetuks.ihub.entity.communication.TargetType;
 import com.onetuks.ihub.entity.project.Project;
 import com.onetuks.ihub.entity.user.User;
+import com.onetuks.ihub.mapper.FeedItemMapper;
 import com.onetuks.ihub.repository.FeedItemJpaRepository;
 import com.onetuks.ihub.repository.ProjectJpaRepository;
 import com.onetuks.ihub.repository.UserJpaRepository;
@@ -67,7 +68,7 @@ class FeedItemServiceTest {
         1L,
         "summary");
 
-    FeedItemResponse response = feedItemService.create(request);
+    FeedItemResponse response = FeedItemMapper.toResponse(feedItemService.create(request));
 
     assertNotNull(response.feedId());
     assertEquals("CREATE", response.eventType());
@@ -76,8 +77,8 @@ class FeedItemServiceTest {
 
   @Test
   void updateFeedItem_success() {
-    FeedItemResponse created = feedItemService.create(new FeedItemCreateRequest(
-        project.getProjectId(), "EVT", actor.getUserId(), TargetType.POST, 1L, "sum"));
+    FeedItemResponse created = FeedItemMapper.toResponse(feedItemService.create(new FeedItemCreateRequest(
+        project.getProjectId(), "EVT", actor.getUserId(), TargetType.POST, 1L, "sum")));
 
     FeedItemUpdateRequest updateRequest = new FeedItemUpdateRequest(
         "UPDATED",
@@ -86,7 +87,7 @@ class FeedItemServiceTest {
         2L,
         "updated summary");
 
-    FeedItemResponse updated = feedItemService.update(created.feedId(), updateRequest);
+    FeedItemResponse updated = FeedItemMapper.toResponse(feedItemService.update(created.feedId(), updateRequest));
 
     assertEquals("UPDATED", updated.eventType());
     assertEquals(TargetType.TASK, updated.targetType());
@@ -105,8 +106,8 @@ class FeedItemServiceTest {
 
   @Test
   void deleteFeedItem_success() {
-    FeedItemResponse created = feedItemService.create(new FeedItemCreateRequest(
-        project.getProjectId(), "C", actor.getUserId(), TargetType.POST, 1L, "s3"));
+    FeedItemResponse created = FeedItemMapper.toResponse(feedItemService.create(new FeedItemCreateRequest(
+        project.getProjectId(), "C", actor.getUserId(), TargetType.POST, 1L, "s3")));
 
     feedItemService.delete(created.feedId());
 

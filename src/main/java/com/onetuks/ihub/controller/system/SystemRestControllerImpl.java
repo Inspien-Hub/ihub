@@ -3,6 +3,7 @@ package com.onetuks.ihub.controller.system;
 import com.onetuks.ihub.dto.system.SystemCreateRequest;
 import com.onetuks.ihub.dto.system.SystemResponse;
 import com.onetuks.ihub.dto.system.SystemUpdateRequest;
+import com.onetuks.ihub.mapper.SystemMapper;
 import com.onetuks.ihub.service.system.SystemService;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -22,25 +23,25 @@ public class SystemRestControllerImpl implements SystemRestController {
   @Override
   public ResponseEntity<SystemResponse> createSystem(
       @Valid @RequestBody SystemCreateRequest request) {
-    SystemResponse response = systemService.create(request);
+    SystemResponse response = SystemMapper.toResponse(systemService.create(request));
     return ResponseEntity.created(URI.create("/api/systems/" + response.systemId()))
         .body(response);
   }
 
   @Override
   public ResponseEntity<SystemResponse> getSystem(@PathVariable Long systemId) {
-    return ResponseEntity.ok(systemService.getById(systemId));
+    return ResponseEntity.ok(SystemMapper.toResponse(systemService.getById(systemId)));
   }
 
   @Override
   public ResponseEntity<List<SystemResponse>> getSystems() {
-    return ResponseEntity.ok(systemService.getAll());
+    return ResponseEntity.ok(systemService.getAll().stream().map(SystemMapper::toResponse).toList());
   }
 
   @Override
   public ResponseEntity<SystemResponse> updateSystem(
       @PathVariable Long systemId, @Valid @RequestBody SystemUpdateRequest request) {
-    return ResponseEntity.ok(systemService.update(systemId, request));
+    return ResponseEntity.ok(SystemMapper.toResponse(systemService.update(systemId, request)));
   }
 
   @Override

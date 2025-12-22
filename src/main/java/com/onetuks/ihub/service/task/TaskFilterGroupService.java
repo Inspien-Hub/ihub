@@ -1,7 +1,6 @@
 package com.onetuks.ihub.service.task;
 
 import com.onetuks.ihub.dto.task.TaskFilterGroupCreateRequest;
-import com.onetuks.ihub.dto.task.TaskFilterGroupResponse;
 import com.onetuks.ihub.dto.task.TaskFilterGroupUpdateRequest;
 import com.onetuks.ihub.entity.project.Project;
 import com.onetuks.ihub.entity.task.TaskFilterGroup;
@@ -25,32 +24,29 @@ public class TaskFilterGroupService {
   private final ProjectJpaRepository projectJpaRepository;
 
   @Transactional
-  public TaskFilterGroupResponse create(TaskFilterGroupCreateRequest request) {
+  public TaskFilterGroup create(TaskFilterGroupCreateRequest request) {
     TaskFilterGroup group = new TaskFilterGroup();
     TaskFilterGroupMapper.applyCreate(group, request);
     group.setUser(findUser(request.userId()));
     group.setProject(findProject(request.projectId()));
-    TaskFilterGroup saved = taskFilterGroupJpaRepository.save(group);
-    return TaskFilterGroupMapper.toResponse(saved);
+    return taskFilterGroupJpaRepository.save(group);
   }
 
   @Transactional(readOnly = true)
-  public TaskFilterGroupResponse getById(Long groupId) {
-    return TaskFilterGroupMapper.toResponse(findEntity(groupId));
+  public TaskFilterGroup getById(Long groupId) {
+    return findEntity(groupId);
   }
 
   @Transactional(readOnly = true)
-  public List<TaskFilterGroupResponse> getAll() {
-    return taskFilterGroupJpaRepository.findAll().stream()
-        .map(TaskFilterGroupMapper::toResponse)
-        .toList();
+  public List<TaskFilterGroup> getAll() {
+    return taskFilterGroupJpaRepository.findAll();
   }
 
   @Transactional
-  public TaskFilterGroupResponse update(Long groupId, TaskFilterGroupUpdateRequest request) {
+  public TaskFilterGroup update(Long groupId, TaskFilterGroupUpdateRequest request) {
     TaskFilterGroup group = findEntity(groupId);
     TaskFilterGroupMapper.applyUpdate(group, request);
-    return TaskFilterGroupMapper.toResponse(group);
+    return group;
   }
 
   @Transactional

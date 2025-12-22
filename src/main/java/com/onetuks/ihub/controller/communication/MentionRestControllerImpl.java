@@ -3,6 +3,7 @@ package com.onetuks.ihub.controller.communication;
 import com.onetuks.ihub.dto.communication.MentionCreateRequest;
 import com.onetuks.ihub.dto.communication.MentionResponse;
 import com.onetuks.ihub.dto.communication.MentionUpdateRequest;
+import com.onetuks.ihub.mapper.MentionMapper;
 import com.onetuks.ihub.service.communication.MentionService;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -22,25 +23,25 @@ public class MentionRestControllerImpl implements MentionRestController {
   @Override
   public ResponseEntity<MentionResponse> createMention(
       @Valid @RequestBody MentionCreateRequest request) {
-    MentionResponse response = mentionService.create(request);
+    MentionResponse response = MentionMapper.toResponse(mentionService.create(request));
     return ResponseEntity.created(URI.create("/api/mentions/" + response.mentionId()))
         .body(response);
   }
 
   @Override
   public ResponseEntity<MentionResponse> getMention(@PathVariable Long mentionId) {
-    return ResponseEntity.ok(mentionService.getById(mentionId));
+    return ResponseEntity.ok(MentionMapper.toResponse(mentionService.getById(mentionId)));
   }
 
   @Override
   public ResponseEntity<List<MentionResponse>> getMentions() {
-    return ResponseEntity.ok(mentionService.getAll());
+    return ResponseEntity.ok(mentionService.getAll().stream().map(MentionMapper::toResponse).toList());
   }
 
   @Override
   public ResponseEntity<MentionResponse> updateMention(
       @PathVariable Long mentionId, @Valid @RequestBody MentionUpdateRequest request) {
-    return ResponseEntity.ok(mentionService.update(mentionId, request));
+    return ResponseEntity.ok(MentionMapper.toResponse(mentionService.update(mentionId, request)));
   }
 
   @Override

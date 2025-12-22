@@ -3,6 +3,7 @@ package com.onetuks.ihub.controller.interfaces;
 import com.onetuks.ihub.dto.interfaces.InterfaceStatusHistoryCreateRequest;
 import com.onetuks.ihub.dto.interfaces.InterfaceStatusHistoryResponse;
 import com.onetuks.ihub.dto.interfaces.InterfaceStatusHistoryUpdateRequest;
+import com.onetuks.ihub.mapper.InterfaceStatusHistoryMapper;
 import com.onetuks.ihub.service.interfaces.InterfaceStatusHistoryService;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -23,7 +24,8 @@ public class InterfaceStatusHistoryRestControllerImpl
   @Override
   public ResponseEntity<InterfaceStatusHistoryResponse> createInterfaceStatusHistory(
       @Valid @RequestBody InterfaceStatusHistoryCreateRequest request) {
-    InterfaceStatusHistoryResponse response = interfaceStatusHistoryService.create(request);
+    InterfaceStatusHistoryResponse response =
+        InterfaceStatusHistoryMapper.toResponse(interfaceStatusHistoryService.create(request));
     return ResponseEntity.created(
             URI.create("/api/interface-status-histories/" + response.historyId()))
         .body(response);
@@ -32,18 +34,23 @@ public class InterfaceStatusHistoryRestControllerImpl
   @Override
   public ResponseEntity<InterfaceStatusHistoryResponse> getInterfaceStatusHistory(
       Long historyId) {
-    return ResponseEntity.ok(interfaceStatusHistoryService.getById(historyId));
+    return ResponseEntity.ok(
+        InterfaceStatusHistoryMapper.toResponse(interfaceStatusHistoryService.getById(historyId)));
   }
 
   @Override
   public ResponseEntity<List<InterfaceStatusHistoryResponse>> getInterfaceStatusHistories() {
-    return ResponseEntity.ok(interfaceStatusHistoryService.getAll());
+    return ResponseEntity.ok(
+        interfaceStatusHistoryService.getAll().stream()
+            .map(InterfaceStatusHistoryMapper::toResponse)
+            .toList());
   }
 
   @Override
   public ResponseEntity<InterfaceStatusHistoryResponse> updateInterfaceStatusHistory(
       Long historyId, @Valid @RequestBody InterfaceStatusHistoryUpdateRequest request) {
-    return ResponseEntity.ok(interfaceStatusHistoryService.update(historyId, request));
+    return ResponseEntity.ok(InterfaceStatusHistoryMapper.toResponse(
+        interfaceStatusHistoryService.update(historyId, request)));
   }
 
   @Override

@@ -3,11 +3,11 @@ package com.onetuks.ihub.dto.file;
 import java.time.LocalDateTime;
 
 public record FolderResponse(
-    Long folderId,
-    Long projectId,
-    Long parentFolderId,
+    String folderId,
+    String projectId,
+    String parentFolderId,
     String name,
-    Long createdById,
+    String createdById,
     LocalDateTime createdAt,
     LocalDateTime updatedAt
 ) {

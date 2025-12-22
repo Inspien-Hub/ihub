@@ -3,6 +3,7 @@ package com.onetuks.ihub.controller.interfaces;
 import com.onetuks.ihub.dto.interfaces.InterfaceStatusCreateRequest;
 import com.onetuks.ihub.dto.interfaces.InterfaceStatusResponse;
 import com.onetuks.ihub.dto.interfaces.InterfaceStatusUpdateRequest;
+import com.onetuks.ihub.mapper.InterfaceStatusMapper;
 import com.onetuks.ihub.service.interfaces.InterfaceStatusService;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -22,25 +23,29 @@ public class InterfaceStatusRestControllerImpl implements InterfaceStatusRestCon
   @Override
   public ResponseEntity<InterfaceStatusResponse> createInterfaceStatus(
       @Valid @RequestBody InterfaceStatusCreateRequest request) {
-    InterfaceStatusResponse response = interfaceStatusService.create(request);
+    InterfaceStatusResponse response = InterfaceStatusMapper.toResponse(
+        interfaceStatusService.create(request));
     return ResponseEntity.created(URI.create("/api/interface-statuses/" + response.statusId()))
         .body(response);
   }
 
   @Override
   public ResponseEntity<InterfaceStatusResponse> getInterfaceStatus(@PathVariable Long statusId) {
-    return ResponseEntity.ok(interfaceStatusService.getById(statusId));
+    return ResponseEntity.ok(
+        InterfaceStatusMapper.toResponse(interfaceStatusService.getById(statusId)));
   }
 
   @Override
   public ResponseEntity<List<InterfaceStatusResponse>> getInterfaceStatuses() {
-    return ResponseEntity.ok(interfaceStatusService.getAll());
+    return ResponseEntity.ok(
+        interfaceStatusService.getAll().stream().map(InterfaceStatusMapper::toResponse).toList());
   }
 
   @Override
   public ResponseEntity<InterfaceStatusResponse> updateInterfaceStatus(
       @PathVariable Long statusId, @Valid @RequestBody InterfaceStatusUpdateRequest request) {
-    return ResponseEntity.ok(interfaceStatusService.update(statusId, request));
+    return ResponseEntity.ok(
+        InterfaceStatusMapper.toResponse(interfaceStatusService.update(statusId, request)));
   }
 
   @Override

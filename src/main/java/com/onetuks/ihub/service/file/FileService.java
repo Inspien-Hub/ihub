@@ -1,7 +1,6 @@
 package com.onetuks.ihub.service.file;
 
 import com.onetuks.ihub.dto.file.FileCreateRequest;
-import com.onetuks.ihub.dto.file.FileResponse;
 import com.onetuks.ihub.dto.file.FileUpdateRequest;
 import com.onetuks.ihub.entity.file.File;
 import com.onetuks.ihub.entity.file.Folder;
@@ -28,7 +27,7 @@ public class FileService {
   private final UserJpaRepository userJpaRepository;
 
   @Transactional
-  public FileResponse create(FileCreateRequest request) {
+  public File create(FileCreateRequest request) {
     File file = new File();
     FileMapper.applyCreate(file, request);
     file.setProject(findProject(request.projectId()));
@@ -38,24 +37,21 @@ public class FileService {
     if (request.uploadedById() != null) {
       file.setUploadedBy(findUser(request.uploadedById()));
     }
-    File saved = fileJpaRepository.save(file);
-    return FileMapper.toResponse(saved);
+    return fileJpaRepository.save(file);
   }
 
   @Transactional(readOnly = true)
-  public FileResponse getById(Long fileId) {
-    return FileMapper.toResponse(findEntity(fileId));
+  public File getById(Long fileId) {
+    return findEntity(fileId);
   }
 
   @Transactional(readOnly = true)
-  public List<FileResponse> getAll() {
-    return fileJpaRepository.findAll().stream()
-        .map(FileMapper::toResponse)
-        .toList();
+  public List<File> getAll() {
+    return fileJpaRepository.findAll();
   }
 
   @Transactional
-  public FileResponse update(Long fileId, FileUpdateRequest request) {
+  public File update(Long fileId, FileUpdateRequest request) {
     File file = findEntity(fileId);
     FileMapper.applyUpdate(file, request);
     if (request.folderId() != null) {
@@ -64,7 +60,7 @@ public class FileService {
     if (request.uploadedById() != null) {
       file.setUploadedBy(findUser(request.uploadedById()));
     }
-    return FileMapper.toResponse(file);
+    return file;
   }
 
   @Transactional

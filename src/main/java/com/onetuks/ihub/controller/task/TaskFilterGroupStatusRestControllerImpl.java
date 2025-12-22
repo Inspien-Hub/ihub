@@ -3,6 +3,7 @@ package com.onetuks.ihub.controller.task;
 import com.onetuks.ihub.dto.task.TaskFilterGroupStatusCreateRequest;
 import com.onetuks.ihub.dto.task.TaskFilterGroupStatusResponse;
 import com.onetuks.ihub.dto.task.TaskFilterGroupStatusUpdateRequest;
+import com.onetuks.ihub.mapper.TaskFilterGroupStatusMapper;
 import com.onetuks.ihub.service.task.TaskFilterGroupStatusService;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -23,25 +24,32 @@ public class TaskFilterGroupStatusRestControllerImpl
   @Override
   public ResponseEntity<TaskFilterGroupStatusResponse> createTaskFilterGroupStatus(
       @Valid @RequestBody TaskFilterGroupStatusCreateRequest request) {
-    TaskFilterGroupStatusResponse response = taskFilterGroupStatusService.create(request);
-    return ResponseEntity.created(URI.create("/api/task-filter-group-statuses/" + response.statusId()))
+    TaskFilterGroupStatusResponse response =
+        TaskFilterGroupStatusMapper.toResponse(taskFilterGroupStatusService.create(request));
+    return ResponseEntity.created(
+            URI.create("/api/task-filter-group-statuses/" + response.statusId()))
         .body(response);
   }
 
   @Override
   public ResponseEntity<TaskFilterGroupStatusResponse> getTaskFilterGroupStatus(Long statusId) {
-    return ResponseEntity.ok(taskFilterGroupStatusService.getById(statusId));
+    return ResponseEntity.ok(
+        TaskFilterGroupStatusMapper.toResponse(taskFilterGroupStatusService.getById(statusId)));
   }
 
   @Override
   public ResponseEntity<List<TaskFilterGroupStatusResponse>> getTaskFilterGroupStatuses() {
-    return ResponseEntity.ok(taskFilterGroupStatusService.getAll());
+    return ResponseEntity.ok(
+        taskFilterGroupStatusService.getAll().stream()
+            .map(TaskFilterGroupStatusMapper::toResponse)
+            .toList());
   }
 
   @Override
   public ResponseEntity<TaskFilterGroupStatusResponse> updateTaskFilterGroupStatus(
       Long statusId, @Valid @RequestBody TaskFilterGroupStatusUpdateRequest request) {
-    return ResponseEntity.ok(taskFilterGroupStatusService.update(statusId, request));
+    return ResponseEntity.ok(TaskFilterGroupStatusMapper.toResponse(
+        taskFilterGroupStatusService.update(statusId, request)));
   }
 
   @Override

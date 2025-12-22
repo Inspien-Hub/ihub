@@ -1,7 +1,6 @@
 package com.onetuks.ihub.service.communication;
 
 import com.onetuks.ihub.dto.communication.PostCreateRequest;
-import com.onetuks.ihub.dto.communication.PostResponse;
 import com.onetuks.ihub.dto.communication.PostUpdateRequest;
 import com.onetuks.ihub.entity.communication.Post;
 import com.onetuks.ihub.entity.project.Project;
@@ -25,34 +24,31 @@ public class PostService {
   private final UserJpaRepository userJpaRepository;
 
   @Transactional
-  public PostResponse create(PostCreateRequest request) {
+  public Post create(PostCreateRequest request) {
     Post post = new Post();
     PostMapper.applyCreate(post, request);
     post.setProject(findProject(request.projectId()));
     if (request.createdById() != null) {
       post.setCreatedBy(findUser(request.createdById()));
     }
-    Post saved = postJpaRepository.save(post);
-    return PostMapper.toResponse(saved);
+    return postJpaRepository.save(post);
   }
 
   @Transactional(readOnly = true)
-  public PostResponse getById(Long postId) {
-    return PostMapper.toResponse(findEntity(postId));
+  public Post getById(Long postId) {
+    return findEntity(postId);
   }
 
   @Transactional(readOnly = true)
-  public List<PostResponse> getAll() {
-    return postJpaRepository.findAll().stream()
-        .map(PostMapper::toResponse)
-        .toList();
+  public List<Post> getAll() {
+    return postJpaRepository.findAll();
   }
 
   @Transactional
-  public PostResponse update(Long postId, PostUpdateRequest request) {
+  public Post update(Long postId, PostUpdateRequest request) {
     Post post = findEntity(postId);
     PostMapper.applyUpdate(post, request);
-    return PostMapper.toResponse(post);
+    return post;
   }
 
   @Transactional

@@ -11,6 +11,7 @@ import com.onetuks.ihub.dto.task.TaskFilterGroupUpdateRequest;
 import com.onetuks.ihub.entity.project.Project;
 import com.onetuks.ihub.entity.task.TaskFilterGroupDateType;
 import com.onetuks.ihub.entity.user.User;
+import com.onetuks.ihub.mapper.TaskFilterGroupMapper;
 import com.onetuks.ihub.repository.ProjectJpaRepository;
 import com.onetuks.ihub.repository.TaskFilterGroupJpaRepository;
 import com.onetuks.ihub.repository.UserJpaRepository;
@@ -68,7 +69,8 @@ class TaskFilterGroupServiceTest {
         LocalDate.now(),
         LocalDate.now().plusDays(1));
 
-    TaskFilterGroupResponse response = taskFilterGroupService.create(request);
+    TaskFilterGroupResponse response =
+        TaskFilterGroupMapper.toResponse(taskFilterGroupService.create(request));
 
     assertNotNull(response.groupId());
     assertEquals("MyGroup", response.name());
@@ -77,9 +79,10 @@ class TaskFilterGroupServiceTest {
 
   @Test
   void updateTaskFilterGroup_success() {
-    TaskFilterGroupResponse created = taskFilterGroupService.create(new TaskFilterGroupCreateRequest(
-        user.getUserId(), project.getProjectId(), "Group", null, null,
-        TaskFilterGroupDateType.CREATED, null, null));
+    TaskFilterGroupResponse created = TaskFilterGroupMapper.toResponse(
+        taskFilterGroupService.create(new TaskFilterGroupCreateRequest(
+            user.getUserId(), project.getProjectId(), "Group", null, null,
+            TaskFilterGroupDateType.CREATED, null, null)));
 
     TaskFilterGroupUpdateRequest updateRequest = new TaskFilterGroupUpdateRequest(
         "GroupUpdated",
@@ -90,8 +93,8 @@ class TaskFilterGroupServiceTest {
         LocalDate.now().plusDays(2),
         LocalDate.now());
 
-    TaskFilterGroupResponse updated =
-        taskFilterGroupService.update(created.groupId(), updateRequest);
+    TaskFilterGroupResponse updated = TaskFilterGroupMapper.toResponse(
+        taskFilterGroupService.update(created.groupId(), updateRequest));
 
     assertEquals("GroupUpdated", updated.name());
     assertEquals(TaskFilterGroupDateType.DUE, updated.dateType());
@@ -111,9 +114,10 @@ class TaskFilterGroupServiceTest {
 
   @Test
   void deleteTaskFilterGroup_success() {
-    TaskFilterGroupResponse created = taskFilterGroupService.create(new TaskFilterGroupCreateRequest(
+    TaskFilterGroupResponse created = TaskFilterGroupMapper.toResponse(
+        taskFilterGroupService.create(new TaskFilterGroupCreateRequest(
         user.getUserId(), project.getProjectId(), "G3", null, null,
-        TaskFilterGroupDateType.CREATED, null, null));
+        TaskFilterGroupDateType.CREATED, null, null)));
 
     taskFilterGroupService.delete(created.groupId());
 

@@ -3,6 +3,7 @@ package com.onetuks.ihub.controller.interfaces;
 import com.onetuks.ihub.dto.interfaces.InterfaceStatusTransitionCreateRequest;
 import com.onetuks.ihub.dto.interfaces.InterfaceStatusTransitionResponse;
 import com.onetuks.ihub.dto.interfaces.InterfaceStatusTransitionUpdateRequest;
+import com.onetuks.ihub.mapper.InterfaceStatusTransitionMapper;
 import com.onetuks.ihub.service.interfaces.InterfaceStatusTransitionService;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -23,7 +24,8 @@ public class InterfaceStatusTransitionRestControllerImpl
   @Override
   public ResponseEntity<InterfaceStatusTransitionResponse> createInterfaceStatusTransition(
       @Valid @RequestBody InterfaceStatusTransitionCreateRequest request) {
-    InterfaceStatusTransitionResponse response = interfaceStatusTransitionService.create(request);
+    InterfaceStatusTransitionResponse response = InterfaceStatusTransitionMapper.toResponse(
+        interfaceStatusTransitionService.create(request));
     return ResponseEntity.created(
             URI.create("/api/interface-status-transitions/" + response.transitionId()))
         .body(response);
@@ -32,18 +34,23 @@ public class InterfaceStatusTransitionRestControllerImpl
   @Override
   public ResponseEntity<InterfaceStatusTransitionResponse> getInterfaceStatusTransition(
       Long transitionId) {
-    return ResponseEntity.ok(interfaceStatusTransitionService.getById(transitionId));
+    return ResponseEntity.ok(InterfaceStatusTransitionMapper.toResponse(
+        interfaceStatusTransitionService.getById(transitionId)));
   }
 
   @Override
   public ResponseEntity<List<InterfaceStatusTransitionResponse>> getInterfaceStatusTransitions() {
-    return ResponseEntity.ok(interfaceStatusTransitionService.getAll());
+    return ResponseEntity.ok(
+        interfaceStatusTransitionService.getAll().stream()
+            .map(InterfaceStatusTransitionMapper::toResponse)
+            .toList());
   }
 
   @Override
   public ResponseEntity<InterfaceStatusTransitionResponse> updateInterfaceStatusTransition(
       Long transitionId, @Valid @RequestBody InterfaceStatusTransitionUpdateRequest request) {
-    return ResponseEntity.ok(interfaceStatusTransitionService.update(transitionId, request));
+    return ResponseEntity.ok(InterfaceStatusTransitionMapper.toResponse(
+        interfaceStatusTransitionService.update(transitionId, request)));
   }
 
   @Override

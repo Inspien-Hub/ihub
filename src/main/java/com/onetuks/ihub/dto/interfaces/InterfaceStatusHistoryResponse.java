@@ -3,13 +3,13 @@ package com.onetuks.ihub.dto.interfaces;
 import java.time.LocalDateTime;
 
 public record InterfaceStatusHistoryResponse(
-    Long historyId,
-    Long interfaceId,
-    Long fromStatusId,
-    Long toStatusId,
-    Long changedById,
+    String historyId,
+    String interfaceId,
+    String fromStatusId,
+    String toStatusId,
+    String changedById,
     LocalDateTime changedAt,
-    Long relatedTaskId,
+    String relatedTaskId,
     String reason
 ) {
 }

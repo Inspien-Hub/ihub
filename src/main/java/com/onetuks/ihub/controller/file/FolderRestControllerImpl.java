@@ -3,6 +3,7 @@ package com.onetuks.ihub.controller.file;
 import com.onetuks.ihub.dto.file.FolderCreateRequest;
 import com.onetuks.ihub.dto.file.FolderResponse;
 import com.onetuks.ihub.dto.file.FolderUpdateRequest;
+import com.onetuks.ihub.mapper.FolderMapper;
 import com.onetuks.ihub.service.file.FolderService;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -22,25 +23,25 @@ public class FolderRestControllerImpl implements FolderRestController {
   @Override
   public ResponseEntity<FolderResponse> createFolder(
       @Valid @RequestBody FolderCreateRequest request) {
-    FolderResponse response = folderService.create(request);
+    FolderResponse response = FolderMapper.toResponse(folderService.create(request));
     return ResponseEntity.created(URI.create("/api/folders/" + response.folderId()))
         .body(response);
   }
 
   @Override
   public ResponseEntity<FolderResponse> getFolder(@PathVariable Long folderId) {
-    return ResponseEntity.ok(folderService.getById(folderId));
+    return ResponseEntity.ok(FolderMapper.toResponse(folderService.getById(folderId)));
   }
 
   @Override
   public ResponseEntity<List<FolderResponse>> getFolders() {
-    return ResponseEntity.ok(folderService.getAll());
+    return ResponseEntity.ok(folderService.getAll().stream().map(FolderMapper::toResponse).toList());
   }
 
   @Override
   public ResponseEntity<FolderResponse> updateFolder(
       @PathVariable Long folderId, @Valid @RequestBody FolderUpdateRequest request) {
-    return ResponseEntity.ok(folderService.update(folderId, request));
+    return ResponseEntity.ok(FolderMapper.toResponse(folderService.update(folderId, request)));
   }
 
   @Override

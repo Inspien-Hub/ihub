@@ -3,6 +3,7 @@ package com.onetuks.ihub.controller.interfaces;
 import com.onetuks.ihub.dto.interfaces.InterfaceCreateRequest;
 import com.onetuks.ihub.dto.interfaces.InterfaceResponse;
 import com.onetuks.ihub.dto.interfaces.InterfaceUpdateRequest;
+import com.onetuks.ihub.mapper.InterfaceMapper;
 import com.onetuks.ihub.service.interfaces.InterfaceService;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -22,25 +23,27 @@ public class InterfaceRestControllerImpl implements InterfaceRestController {
   @Override
   public ResponseEntity<InterfaceResponse> createInterface(
       @Valid @RequestBody InterfaceCreateRequest request) {
-    InterfaceResponse response = interfaceService.create(request);
+    InterfaceResponse response = InterfaceMapper.toResponse(interfaceService.create(request));
     return ResponseEntity.created(URI.create("/api/interfaces/" + response.interfaceId()))
         .body(response);
   }
 
   @Override
   public ResponseEntity<InterfaceResponse> getInterface(@PathVariable Long interfaceId) {
-    return ResponseEntity.ok(interfaceService.getById(interfaceId));
+    return ResponseEntity.ok(InterfaceMapper.toResponse(interfaceService.getById(interfaceId)));
   }
 
   @Override
   public ResponseEntity<List<InterfaceResponse>> getInterfaces() {
-    return ResponseEntity.ok(interfaceService.getAll());
+    return ResponseEntity.ok(
+        interfaceService.getAll().stream().map(InterfaceMapper::toResponse).toList());
   }
 
   @Override
   public ResponseEntity<InterfaceResponse> updateInterface(
       @PathVariable Long interfaceId, @Valid @RequestBody InterfaceUpdateRequest request) {
-    return ResponseEntity.ok(interfaceService.update(interfaceId, request));
+    return ResponseEntity.ok(
+        InterfaceMapper.toResponse(interfaceService.update(interfaceId, request)));
   }
 
   @Override

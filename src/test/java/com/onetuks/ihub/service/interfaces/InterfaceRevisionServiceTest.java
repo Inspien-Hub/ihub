@@ -14,6 +14,8 @@ import com.onetuks.ihub.entity.interfaces.InterfaceType;
 import com.onetuks.ihub.entity.interfaces.SyncAsyncType;
 import com.onetuks.ihub.entity.project.Project;
 import com.onetuks.ihub.entity.user.User;
+import com.onetuks.ihub.mapper.InterfaceMapper;
+import com.onetuks.ihub.mapper.InterfaceRevisionMapper;
 import com.onetuks.ihub.repository.InterfaceJpaRepository;
 import com.onetuks.ihub.repository.InterfaceRevisionJpaRepository;
 import com.onetuks.ihub.repository.InterfaceStatusJpaRepository;
@@ -72,7 +74,7 @@ class InterfaceRevisionServiceTest {
     sourceSystem = ServiceTestDataFactory.createSystem(systemJpaRepository, project, user, user, "SRC-REV");
     targetSystem = ServiceTestDataFactory.createSystem(systemJpaRepository, project, user, user, "TGT-REV");
     status = ServiceTestDataFactory.createInterfaceStatus(interfaceStatusJpaRepository, project, "Draft", 1);
-    interfaceId = interfaceService.create(new InterfaceCreateRequest(
+    interfaceId = InterfaceMapper.toResponse(interfaceService.create(new InterfaceCreateRequest(
         project.getProjectId(),
         "IF-REV",
         sourceSystem.getSystemId(),
@@ -86,7 +88,7 @@ class InterfaceRevisionServiceTest {
         status.getStatusId(),
         "batch",
         "remark",
-        user.getUserId())).interfaceId();
+        user.getUserId()))).interfaceId();
   }
 
   @AfterEach
@@ -108,7 +110,8 @@ class InterfaceRevisionServiceTest {
         Map.of("k", "v"),
         "reason");
 
-    InterfaceRevisionResponse response = interfaceRevisionService.create(request);
+    InterfaceRevisionResponse response =
+        InterfaceRevisionMapper.toResponse(interfaceRevisionService.create(request));
 
     assertNotNull(response.revisionId());
     assertEquals(1, response.versionNo());
@@ -117,14 +120,15 @@ class InterfaceRevisionServiceTest {
 
   @Test
   void updateInterfaceRevision_success() {
-    InterfaceRevisionResponse created = interfaceRevisionService.create(new InterfaceRevisionCreateRequest(
-        interfaceId, 1, user.getUserId(), Map.of("k", "v"), "reason"));
+    InterfaceRevisionResponse created = InterfaceRevisionMapper.toResponse(
+        interfaceRevisionService.create(new InterfaceRevisionCreateRequest(
+            interfaceId, 1, user.getUserId(), Map.of("k", "v"), "reason")));
 
     InterfaceRevisionUpdateRequest updateRequest =
         new InterfaceRevisionUpdateRequest(2, user.getUserId(), Map.of("k2", "v2"), "new reason");
 
-    InterfaceRevisionResponse updated =
-        interfaceRevisionService.update(created.revisionId(), updateRequest);
+    InterfaceRevisionResponse updated = InterfaceRevisionMapper.toResponse(
+        interfaceRevisionService.update(created.revisionId(), updateRequest));
 
     assertEquals(2, updated.versionNo());
     assertEquals("new reason", updated.reason());
@@ -142,8 +146,9 @@ class InterfaceRevisionServiceTest {
 
   @Test
   void deleteInterfaceRevision_success() {
-    InterfaceRevisionResponse created = interfaceRevisionService.create(new InterfaceRevisionCreateRequest(
-        interfaceId, 1, user.getUserId(), Map.of("a", "b"), "r1"));
+    InterfaceRevisionResponse created = InterfaceRevisionMapper.toResponse(
+        interfaceRevisionService.create(new InterfaceRevisionCreateRequest(
+            interfaceId, 1, user.getUserId(), Map.of("a", "b"), "r1")));
 
     interfaceRevisionService.delete(created.revisionId());
 

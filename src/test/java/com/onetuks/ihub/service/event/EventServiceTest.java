@@ -10,6 +10,7 @@ import com.onetuks.ihub.dto.event.EventResponse;
 import com.onetuks.ihub.dto.event.EventUpdateRequest;
 import com.onetuks.ihub.entity.project.Project;
 import com.onetuks.ihub.entity.user.User;
+import com.onetuks.ihub.mapper.EventMapper;
 import com.onetuks.ihub.repository.EventJpaRepository;
 import com.onetuks.ihub.repository.ProjectJpaRepository;
 import com.onetuks.ihub.repository.UserJpaRepository;
@@ -67,7 +68,7 @@ class EventServiceTest {
         30,
         creator.getUserId());
 
-    EventResponse response = eventService.create(request);
+    EventResponse response = EventMapper.toResponse(eventService.create(request));
 
     assertNotNull(response.eventId());
     assertEquals("Kickoff", response.title());
@@ -76,9 +77,9 @@ class EventServiceTest {
 
   @Test
   void updateEvent_success() {
-    EventResponse created = eventService.create(new EventCreateRequest(
+    EventResponse created = EventMapper.toResponse(eventService.create(new EventCreateRequest(
         project.getProjectId(), "Planning", LocalDateTime.now(), LocalDateTime.now().plusHours(1),
-        "Room2", "desc", 15, creator.getUserId()));
+        "Room2", "desc", 15, creator.getUserId())));
 
     EventUpdateRequest updateRequest = new EventUpdateRequest(
         "Planning Updated",
@@ -88,7 +89,7 @@ class EventServiceTest {
         "new content",
         10);
 
-    EventResponse updated = eventService.update(created.eventId(), updateRequest);
+    EventResponse updated = EventMapper.toResponse(eventService.update(created.eventId(), updateRequest));
 
     assertEquals("Planning Updated", updated.title());
     assertEquals("Room3", updated.location());
@@ -106,8 +107,8 @@ class EventServiceTest {
 
   @Test
   void deleteEvent_success() {
-    EventResponse created = eventService.create(new EventCreateRequest(
-        project.getProjectId(), "E3", null, null, null, null, null, creator.getUserId()));
+    EventResponse created = EventMapper.toResponse(eventService.create(new EventCreateRequest(
+        project.getProjectId(), "E3", null, null, null, null, null, creator.getUserId())));
 
     eventService.delete(created.eventId());
 

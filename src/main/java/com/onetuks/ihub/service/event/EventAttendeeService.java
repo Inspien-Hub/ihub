@@ -1,7 +1,6 @@
 package com.onetuks.ihub.service.event;
 
 import com.onetuks.ihub.dto.event.EventAttendeeCreateRequest;
-import com.onetuks.ihub.dto.event.EventAttendeeResponse;
 import com.onetuks.ihub.dto.event.EventAttendeeUpdateRequest;
 import com.onetuks.ihub.entity.event.Event;
 import com.onetuks.ihub.entity.event.EventAttendee;
@@ -25,32 +24,29 @@ public class EventAttendeeService {
   private final UserJpaRepository userJpaRepository;
 
   @Transactional
-  public EventAttendeeResponse create(EventAttendeeCreateRequest request) {
+  public EventAttendee create(EventAttendeeCreateRequest request) {
     EventAttendee attendee = new EventAttendee();
     EventAttendeeMapper.applyCreate(attendee, request);
     attendee.setEvent(findEvent(request.eventId()));
     attendee.setUser(findUser(request.userId()));
-    EventAttendee saved = eventAttendeeJpaRepository.save(attendee);
-    return EventAttendeeMapper.toResponse(saved);
+    return eventAttendeeJpaRepository.save(attendee);
   }
 
   @Transactional(readOnly = true)
-  public EventAttendeeResponse getById(Long attendeeId) {
-    return EventAttendeeMapper.toResponse(findEntity(attendeeId));
+  public EventAttendee getById(Long attendeeId) {
+    return findEntity(attendeeId);
   }
 
   @Transactional(readOnly = true)
-  public List<EventAttendeeResponse> getAll() {
-    return eventAttendeeJpaRepository.findAll().stream()
-        .map(EventAttendeeMapper::toResponse)
-        .toList();
+  public List<EventAttendee> getAll() {
+    return eventAttendeeJpaRepository.findAll();
   }
 
   @Transactional
-  public EventAttendeeResponse update(Long attendeeId, EventAttendeeUpdateRequest request) {
+  public EventAttendee update(Long attendeeId, EventAttendeeUpdateRequest request) {
     EventAttendee attendee = findEntity(attendeeId);
     EventAttendeeMapper.applyUpdate(attendee, request);
-    return EventAttendeeMapper.toResponse(attendee);
+    return attendee;
   }
 
   @Transactional

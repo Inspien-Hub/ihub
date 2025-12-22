@@ -12,6 +12,7 @@ import com.onetuks.ihub.entity.project.ProjectStatus;
 import com.onetuks.ihub.entity.user.User;
 import com.onetuks.ihub.entity.user.UserRole;
 import com.onetuks.ihub.entity.user.UserStatus;
+import com.onetuks.ihub.mapper.ProjectMapper;
 import com.onetuks.ihub.repository.ProjectJpaRepository;
 import com.onetuks.ihub.repository.UserJpaRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -63,7 +64,7 @@ class ProjectServiceTest {
         admin.getUserId(),
         ProjectStatus.ACTIVE);
 
-    ProjectResponse response = projectService.create(request);
+    ProjectResponse response = ProjectMapper.toResponse(projectService.create(request));
 
     assertNotNull(response.projectId());
     assertEquals("Project A", response.title());
@@ -74,14 +75,14 @@ class ProjectServiceTest {
 
   @Test
   void updateProject_success() {
-    ProjectResponse created = projectService.create(new ProjectCreateRequest(
+    ProjectResponse created = ProjectMapper.toResponse(projectService.create(new ProjectCreateRequest(
         "Project B",
         "Desc",
         LocalDate.now(),
         LocalDate.now().plusDays(5),
         creator.getUserId(),
         admin.getUserId(),
-        ProjectStatus.ACTIVE));
+        ProjectStatus.ACTIVE)));
 
     ProjectUpdateRequest updateRequest = new ProjectUpdateRequest(
         "Project B Updated",
@@ -91,7 +92,7 @@ class ProjectServiceTest {
         creator.getUserId(), // swap admin
         ProjectStatus.INACTIVE);
 
-    ProjectResponse updated = projectService.update(created.projectId(), updateRequest);
+    ProjectResponse updated = ProjectMapper.toResponse(projectService.update(created.projectId(), updateRequest));
 
     assertEquals("Project B Updated", updated.title());
     assertEquals("New Desc", updated.description());
@@ -106,15 +107,16 @@ class ProjectServiceTest {
     projectService.create(new ProjectCreateRequest(
         "P2", null, null, null, creator.getUserId(), admin.getUserId(), ProjectStatus.ACTIVE));
 
-    List<ProjectResponse> responses = projectService.getAll();
+    List<ProjectResponse> responses =
+        projectService.getAll().stream().map(ProjectMapper::toResponse).toList();
 
     assertEquals(2, responses.size());
   }
 
   @Test
   void deleteProject_success() {
-    ProjectResponse created = projectService.create(new ProjectCreateRequest(
-        "P3", null, null, null, creator.getUserId(), admin.getUserId(), ProjectStatus.ACTIVE));
+    ProjectResponse created = ProjectMapper.toResponse(projectService.create(new ProjectCreateRequest(
+        "P3", null, null, null, creator.getUserId(), admin.getUserId(), ProjectStatus.ACTIVE)));
 
     projectService.delete(created.projectId());
 

@@ -1,7 +1,6 @@
 package com.onetuks.ihub.service.system;
 
 import com.onetuks.ihub.dto.system.SystemCreateRequest;
-import com.onetuks.ihub.dto.system.SystemResponse;
 import com.onetuks.ihub.dto.system.SystemUpdateRequest;
 import com.onetuks.ihub.entity.project.Project;
 import com.onetuks.ihub.entity.system.System;
@@ -25,36 +24,33 @@ public class SystemService {
   private final UserJpaRepository userJpaRepository;
 
   @Transactional
-  public SystemResponse create(SystemCreateRequest request) {
+  public System create(SystemCreateRequest request) {
     System system = new System();
     SystemMapper.applyCreate(system, request);
     system.setProject(findProject(request.projectId()));
     system.setCreatedBy(findUser(request.createdById()));
     system.setUpdatedBy(findUser(request.updatedById()));
-    System saved = systemJpaRepository.save(system);
-    return SystemMapper.toResponse(saved);
+    return systemJpaRepository.save(system);
   }
 
   @Transactional(readOnly = true)
-  public SystemResponse getById(Long systemId) {
-    return SystemMapper.toResponse(findEntity(systemId));
+  public System getById(Long systemId) {
+    return findEntity(systemId);
   }
 
   @Transactional(readOnly = true)
-  public List<SystemResponse> getAll() {
-    return systemJpaRepository.findAll().stream()
-        .map(SystemMapper::toResponse)
-        .toList();
+  public List<System> getAll() {
+    return systemJpaRepository.findAll();
   }
 
   @Transactional
-  public SystemResponse update(Long systemId, SystemUpdateRequest request) {
+  public System update(Long systemId, SystemUpdateRequest request) {
     System system = findEntity(systemId);
     SystemMapper.applyUpdate(system, request);
     if (request.updatedById() != null) {
       system.setUpdatedBy(findUser(request.updatedById()));
     }
-    return SystemMapper.toResponse(system);
+    return system;
   }
 
   @Transactional

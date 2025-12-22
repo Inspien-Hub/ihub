@@ -21,6 +21,7 @@ public final class TaskFilterGroupStatusMapper {
 
   public static void applyCreate(TaskFilterGroupStatus status,
       TaskFilterGroupStatusCreateRequest request) {
+    status.setStatusId(UUIDProvider.provideUUID(TaskFilterGroupStatus.TABLE_NAME));
     status.setStatusType(request.statusType());
     status.setCreatedAt(LocalDateTime.now());
   }

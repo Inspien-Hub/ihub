@@ -13,6 +13,8 @@ import com.onetuks.ihub.dto.file.FolderResponse;
 import com.onetuks.ihub.entity.file.FileStatus;
 import com.onetuks.ihub.entity.project.Project;
 import com.onetuks.ihub.entity.user.User;
+import com.onetuks.ihub.mapper.FileMapper;
+import com.onetuks.ihub.mapper.FolderMapper;
 import com.onetuks.ihub.repository.FileJpaRepository;
 import com.onetuks.ihub.repository.FolderJpaRepository;
 import com.onetuks.ihub.repository.ProjectJpaRepository;
@@ -57,8 +59,8 @@ class FileServiceTest {
   void setUp() {
     uploader = ServiceTestDataFactory.createUser(userJpaRepository, "file@user.com", "FileUser");
     project = ServiceTestDataFactory.createProject(projectJpaRepository, uploader, uploader, "FileProj");
-    FolderResponse folderResponse = folderService.create(new FolderCreateRequest(
-        project.getProjectId(), null, "Docs", uploader.getUserId()));
+    FolderResponse folderResponse = FolderMapper.toResponse(folderService.create(new FolderCreateRequest(
+        project.getProjectId(), null, "Docs", uploader.getUserId())));
     folderId = folderResponse.folderId();
   }
 
@@ -82,7 +84,7 @@ class FileServiceTest {
         "text/plain",
         uploader.getUserId());
 
-    FileResponse response = fileService.create(request);
+    FileResponse response = FileMapper.toResponse(fileService.create(request));
 
     assertNotNull(response.fileId());
     assertEquals("orig.txt", response.originalName());
@@ -91,7 +93,7 @@ class FileServiceTest {
 
   @Test
   void updateFile_success() {
-    FileResponse created = fileService.create(new FileCreateRequest(
+    FileResponse created = FileMapper.toResponse(fileService.create(new FileCreateRequest(
         project.getProjectId(),
         folderId,
         FileStatus.ACTIVE,
@@ -99,7 +101,7 @@ class FileServiceTest {
         "stored2.txt",
         200L,
         "text/plain",
-        uploader.getUserId()));
+        uploader.getUserId())));
 
     FileUpdateRequest updateRequest = new FileUpdateRequest(
         null,
@@ -111,7 +113,7 @@ class FileServiceTest {
         uploader.getUserId(),
         LocalDateTime.now());
 
-    FileResponse updated = fileService.update(created.fileId(), updateRequest);
+    FileResponse updated = FileMapper.toResponse(fileService.update(created.fileId(), updateRequest));
 
     assertEquals(FileStatus.DELETED, updated.status());
     assertEquals("orig2_new.txt", updated.originalName());
@@ -130,8 +132,8 @@ class FileServiceTest {
 
   @Test
   void deleteFile_success() {
-    FileResponse created = fileService.create(new FileCreateRequest(
-        project.getProjectId(), null, FileStatus.ACTIVE, "c", "c", 1L, "text", uploader.getUserId()));
+    FileResponse created = FileMapper.toResponse(fileService.create(new FileCreateRequest(
+        project.getProjectId(), null, FileStatus.ACTIVE, "c", "c", 1L, "text", uploader.getUserId())));
 
     fileService.delete(created.fileId());
 

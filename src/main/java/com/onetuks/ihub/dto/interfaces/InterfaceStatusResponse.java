@@ -3,8 +3,8 @@ package com.onetuks.ihub.dto.interfaces;
 import java.time.LocalDateTime;
 
 public record InterfaceStatusResponse(
-    Long statusId,
-    Long projectId,
+    String statusId,
+    String projectId,
     String name,
     String code,
     Integer seqOrder,

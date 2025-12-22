@@ -3,6 +3,7 @@ package com.onetuks.ihub.controller.task;
 import com.onetuks.ihub.dto.task.TaskCreateRequest;
 import com.onetuks.ihub.dto.task.TaskResponse;
 import com.onetuks.ihub.dto.task.TaskUpdateRequest;
+import com.onetuks.ihub.mapper.TaskMapper;
 import com.onetuks.ihub.service.task.TaskService;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -21,25 +22,25 @@ public class TaskRestControllerImpl implements TaskRestController {
 
   @Override
   public ResponseEntity<TaskResponse> createTask(@Valid @RequestBody TaskCreateRequest request) {
-    TaskResponse response = taskService.create(request);
+    TaskResponse response = TaskMapper.toResponse(taskService.create(request));
     return ResponseEntity.created(URI.create("/api/tasks/" + response.taskId()))
         .body(response);
   }
 
   @Override
   public ResponseEntity<TaskResponse> getTask(@PathVariable Long taskId) {
-    return ResponseEntity.ok(taskService.getById(taskId));
+    return ResponseEntity.ok(TaskMapper.toResponse(taskService.getById(taskId)));
   }
 
   @Override
   public ResponseEntity<List<TaskResponse>> getTasks() {
-    return ResponseEntity.ok(taskService.getAll());
+    return ResponseEntity.ok(taskService.getAll().stream().map(TaskMapper::toResponse).toList());
   }
 
   @Override
   public ResponseEntity<TaskResponse> updateTask(
       @PathVariable Long taskId, @Valid @RequestBody TaskUpdateRequest request) {
-    return ResponseEntity.ok(taskService.update(taskId, request));
+    return ResponseEntity.ok(TaskMapper.toResponse(taskService.update(taskId, request)));
   }
 
   @Override

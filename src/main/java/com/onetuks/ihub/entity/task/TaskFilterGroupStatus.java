@@ -5,8 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -18,17 +16,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "task_filter_group_statuses", uniqueConstraints = {
+@Table(name = TaskFilterGroupStatus.TABLE_NAME, uniqueConstraints = {
     @UniqueConstraint(name = "unq_group_status", columnNames = {"group_id", "status_type"})})
 @Getter
 @Setter
 @RequiredArgsConstructor
 public class TaskFilterGroupStatus {
 
+  public static final String TABLE_NAME = "task_filter_group_statuses";
+
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "status_id", nullable = false)
-  private Long statusId;
+  private String statusId;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "group_id", referencedColumnName = "group_id", nullable = false)

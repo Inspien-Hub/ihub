@@ -15,6 +15,7 @@ import com.onetuks.ihub.entity.system.SystemEnvironment;
 import com.onetuks.ihub.entity.system.SystemStatus;
 import com.onetuks.ihub.entity.system.SystemType;
 import com.onetuks.ihub.entity.user.User;
+import com.onetuks.ihub.mapper.ConnectionMapper;
 import com.onetuks.ihub.repository.ConnectionJpaRepository;
 import com.onetuks.ihub.repository.ProjectJpaRepository;
 import com.onetuks.ihub.repository.SystemJpaRepository;
@@ -87,7 +88,7 @@ class ConnectionServiceTest {
         creator.getUserId(),
         updater.getUserId());
 
-    ConnectionResponse response = connectionService.create(request);
+    ConnectionResponse response = ConnectionMapper.toResponse(connectionService.create(request));
 
     assertNotNull(response.connectionId());
     assertEquals("Conn1", response.name());
@@ -97,21 +98,22 @@ class ConnectionServiceTest {
 
   @Test
   void updateConnection_success() {
-    ConnectionResponse created = connectionService.create(new ConnectionCreateRequest(
-        project.getProjectId(),
-        system.getSystemId(),
-        "Conn2",
-        Protocol.HTTP,
-        "localhost",
-        8080,
-        "/path",
-        "user",
-        "BASIC",
-        null,
-        ConnectionStatus.ACTIVE,
-        "desc",
-        creator.getUserId(),
-        updater.getUserId()));
+    ConnectionResponse created = ConnectionMapper.toResponse(connectionService.create(
+        new ConnectionCreateRequest(
+            project.getProjectId(),
+            system.getSystemId(),
+            "Conn2",
+            Protocol.HTTP,
+            "localhost",
+            8080,
+            "/path",
+            "user",
+            "BASIC",
+            null,
+            ConnectionStatus.ACTIVE,
+            "desc",
+            creator.getUserId(),
+            updater.getUserId())));
 
     ConnectionUpdateRequest updateRequest = new ConnectionUpdateRequest(
         project.getProjectId(),
@@ -128,7 +130,8 @@ class ConnectionServiceTest {
         "new desc",
         creator.getUserId());
 
-    ConnectionResponse updated = connectionService.update(created.connectionId(), updateRequest);
+    ConnectionResponse updated = ConnectionMapper.toResponse(
+        connectionService.update(created.connectionId(), updateRequest));
 
     assertEquals("Conn2-Updated", updated.name());
     assertEquals(Protocol.SFTP, updated.protocol());
@@ -150,9 +153,10 @@ class ConnectionServiceTest {
 
   @Test
   void deleteConnection_success() {
-    ConnectionResponse created = connectionService.create(new ConnectionCreateRequest(
-        project.getProjectId(), system.getSystemId(), "C3", Protocol.HTTP, null, null, null,
-        null, null, null, ConnectionStatus.ACTIVE, null, creator.getUserId(), updater.getUserId()));
+    ConnectionResponse created = ConnectionMapper.toResponse(connectionService.create(
+        new ConnectionCreateRequest(
+            project.getProjectId(), system.getSystemId(), "C3", Protocol.HTTP, null, null, null,
+            null, null, null, ConnectionStatus.ACTIVE, null, creator.getUserId(), updater.getUserId())));
 
     connectionService.delete(created.connectionId());
 

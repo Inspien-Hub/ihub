@@ -1,7 +1,6 @@
 package com.onetuks.ihub.service.project;
 
 import com.onetuks.ihub.dto.project.ProjectMemberCreateRequest;
-import com.onetuks.ihub.dto.project.ProjectMemberResponse;
 import com.onetuks.ihub.dto.project.ProjectMemberUpdateRequest;
 import com.onetuks.ihub.entity.project.Project;
 import com.onetuks.ihub.entity.project.ProjectMember;
@@ -25,32 +24,29 @@ public class ProjectMemberService {
   private final UserJpaRepository userJpaRepository;
 
   @Transactional
-  public ProjectMemberResponse create(ProjectMemberCreateRequest request) {
+  public ProjectMember create(ProjectMemberCreateRequest request) {
     ProjectMember member = new ProjectMember();
     ProjectMemberMapper.applyCreate(member, request);
     member.setProject(findProject(request.projectId()));
     member.setUser(findUser(request.userId()));
-    ProjectMember saved = projectMemberJpaRepository.save(member);
-    return ProjectMemberMapper.toResponse(saved);
+    return projectMemberJpaRepository.save(member);
   }
 
   @Transactional(readOnly = true)
-  public ProjectMemberResponse getById(Long projectMemberId) {
-    return ProjectMemberMapper.toResponse(findEntity(projectMemberId));
+  public ProjectMember getById(Long projectMemberId) {
+    return findEntity(projectMemberId);
   }
 
   @Transactional(readOnly = true)
-  public List<ProjectMemberResponse> getAll() {
-    return projectMemberJpaRepository.findAll().stream()
-        .map(ProjectMemberMapper::toResponse)
-        .toList();
+  public List<ProjectMember> getAll() {
+    return projectMemberJpaRepository.findAll();
   }
 
   @Transactional
-  public ProjectMemberResponse update(Long projectMemberId, ProjectMemberUpdateRequest request) {
+  public ProjectMember update(Long projectMemberId, ProjectMemberUpdateRequest request) {
     ProjectMember member = findEntity(projectMemberId);
     ProjectMemberMapper.applyUpdate(member, request);
-    return ProjectMemberMapper.toResponse(member);
+    return member;
   }
 
   @Transactional

@@ -34,6 +34,7 @@ public final class TaskMapper {
 
   public static void applyCreate(Task task, TaskCreateRequest request) {
     LocalDateTime now = LocalDateTime.now();
+    task.setTaskId(UUIDProvider.provideUUID(Task.TABLE_NAME));
     task.setTaskType(request.taskType());
     task.setTitle(request.title());
     task.setDescription(request.description());

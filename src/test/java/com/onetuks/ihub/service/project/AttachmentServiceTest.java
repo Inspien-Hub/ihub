@@ -14,6 +14,8 @@ import com.onetuks.ihub.entity.communication.TargetType;
 import com.onetuks.ihub.entity.file.FileStatus;
 import com.onetuks.ihub.entity.project.Project;
 import com.onetuks.ihub.entity.user.User;
+import com.onetuks.ihub.mapper.AttachmentMapper;
+import com.onetuks.ihub.mapper.FileMapper;
 import com.onetuks.ihub.repository.AttachmentJpaRepository;
 import com.onetuks.ihub.repository.FileJpaRepository;
 import com.onetuks.ihub.repository.ProjectJpaRepository;
@@ -58,8 +60,8 @@ class AttachmentServiceTest {
   void setUp() {
     user = ServiceTestDataFactory.createUser(userJpaRepository, "attach@user.com", "AttachUser");
     project = ServiceTestDataFactory.createProject(projectJpaRepository, user, user, "AttachProj");
-    FileResponse file = fileService.create(new FileCreateRequest(
-        project.getProjectId(), null, FileStatus.ACTIVE, "orig", "stored", 10L, "text", user.getUserId()));
+    FileResponse file = FileMapper.toResponse(fileService.create(new FileCreateRequest(
+        project.getProjectId(), null, FileStatus.ACTIVE, "orig", "stored", 10L, "text", user.getUserId())));
     fileId = file.fileId();
   }
 
@@ -80,7 +82,7 @@ class AttachmentServiceTest {
         1L,
         user.getUserId());
 
-    AttachmentResponse response = attachmentService.create(request);
+    AttachmentResponse response = AttachmentMapper.toResponse(attachmentService.create(request));
 
     assertNotNull(response.attachmentId());
     assertEquals(fileId, response.fileId());
@@ -89,10 +91,11 @@ class AttachmentServiceTest {
 
   @Test
   void updateAttachment_success() {
-    AttachmentResponse created = attachmentService.create(new AttachmentCreateRequest(
-        project.getProjectId(), fileId, TargetType.POST, 1L, user.getUserId()));
-    FileResponse newFile = fileService.create(new FileCreateRequest(
-        project.getProjectId(), null, FileStatus.ACTIVE, "orig2", "stored2", 20L, "text", user.getUserId()));
+    AttachmentResponse created = AttachmentMapper.toResponse(attachmentService.create(
+        new AttachmentCreateRequest(
+            project.getProjectId(), fileId, TargetType.POST, 1L, user.getUserId())));
+    FileResponse newFile = FileMapper.toResponse(fileService.create(new FileCreateRequest(
+        project.getProjectId(), null, FileStatus.ACTIVE, "orig2", "stored2", 20L, "text", user.getUserId())));
 
     AttachmentUpdateRequest updateRequest = new AttachmentUpdateRequest(
         newFile.fileId(),
@@ -100,7 +103,8 @@ class AttachmentServiceTest {
         2L,
         user.getUserId());
 
-    AttachmentResponse updated = attachmentService.update(created.attachmentId(), updateRequest);
+    AttachmentResponse updated =
+        AttachmentMapper.toResponse(attachmentService.update(created.attachmentId(), updateRequest));
 
     assertEquals(TargetType.TASK, updated.targetType());
     assertEquals(2L, updated.targetId());
@@ -119,8 +123,9 @@ class AttachmentServiceTest {
 
   @Test
   void deleteAttachment_success() {
-    AttachmentResponse created = attachmentService.create(new AttachmentCreateRequest(
-        project.getProjectId(), fileId, TargetType.POST, 1L, user.getUserId()));
+    AttachmentResponse created = AttachmentMapper.toResponse(attachmentService.create(
+        new AttachmentCreateRequest(
+            project.getProjectId(), fileId, TargetType.POST, 1L, user.getUserId())));
 
     attachmentService.delete(created.attachmentId());
 

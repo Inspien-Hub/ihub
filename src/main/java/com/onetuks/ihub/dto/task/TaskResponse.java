@@ -7,21 +7,21 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public record TaskResponse(
-    Long taskId,
-    Long projectId,
-    Long parentTaskId,
+    String taskId,
+    String projectId,
+    String parentTaskId,
     TaskType taskType,
-    Long interfaceId,
+    String interfaceId,
     String title,
     String description,
     TaskStatus status,
-    Long assigneeId,
-    Long requesterId,
+    String assigneeId,
+    String requesterId,
     LocalDate startDate,
     LocalDate dueDate,
     TaskPriority priority,
     Integer progress,
-    Long createdById,
+    String createdById,
     LocalDateTime createdAt,
     LocalDateTime updatedAt
 ) {

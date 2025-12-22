@@ -13,6 +13,7 @@ import com.onetuks.ihub.entity.interfaces.InterfaceStatus;
 import com.onetuks.ihub.entity.interfaces.InterfaceStatusTransitionStatus;
 import com.onetuks.ihub.entity.project.Project;
 import com.onetuks.ihub.entity.user.User;
+import com.onetuks.ihub.mapper.InterfaceStatusTransitionMapper;
 import com.onetuks.ihub.repository.InterfaceStatusJpaRepository;
 import com.onetuks.ihub.repository.InterfaceStatusTransitionJpaRepository;
 import com.onetuks.ihub.repository.ProjectJpaRepository;
@@ -78,7 +79,8 @@ class InterfaceStatusTransitionServiceTest {
         InterfaceStatusTransitionStatus.ACTIVE,
         user.getUserId());
 
-    InterfaceStatusTransitionResponse response = interfaceStatusTransitionService.create(request);
+    InterfaceStatusTransitionResponse response = InterfaceStatusTransitionMapper.toResponse(
+        interfaceStatusTransitionService.create(request));
 
     assertNotNull(response.transitionId());
     assertEquals(InterfaceRole.ADMIN, response.allowedRole());
@@ -87,10 +89,11 @@ class InterfaceStatusTransitionServiceTest {
 
   @Test
   void updateInterfaceStatusTransition_success() {
-    InterfaceStatusTransitionResponse created = interfaceStatusTransitionService.create(
+    InterfaceStatusTransitionResponse created = InterfaceStatusTransitionMapper.toResponse(
+        interfaceStatusTransitionService.create(
         new InterfaceStatusTransitionCreateRequest(
             project.getProjectId(), fromStatus.getStatusId(), toStatus.getStatusId(),
-            InterfaceRole.ADMIN, InterfaceStatusTransitionStatus.ACTIVE, user.getUserId()));
+            InterfaceRole.ADMIN, InterfaceStatusTransitionStatus.ACTIVE, user.getUserId())));
 
     InterfaceStatusTransitionUpdateRequest updateRequest =
         new InterfaceStatusTransitionUpdateRequest(
@@ -99,8 +102,8 @@ class InterfaceStatusTransitionServiceTest {
             InterfaceRole.MEMBER,
             InterfaceStatusTransitionStatus.INACTIVE);
 
-    InterfaceStatusTransitionResponse updated =
-        interfaceStatusTransitionService.update(created.transitionId(), updateRequest);
+    InterfaceStatusTransitionResponse updated = InterfaceStatusTransitionMapper.toResponse(
+        interfaceStatusTransitionService.update(created.transitionId(), updateRequest));
 
     assertEquals(InterfaceRole.MEMBER, updated.allowedRole());
     assertEquals(InterfaceStatusTransitionStatus.INACTIVE, updated.status());
@@ -120,10 +123,11 @@ class InterfaceStatusTransitionServiceTest {
 
   @Test
   void deleteInterfaceStatusTransition_success() {
-    InterfaceStatusTransitionResponse created = interfaceStatusTransitionService.create(
+    InterfaceStatusTransitionResponse created = InterfaceStatusTransitionMapper.toResponse(
+        interfaceStatusTransitionService.create(
         new InterfaceStatusTransitionCreateRequest(
             project.getProjectId(), fromStatus.getStatusId(), toStatus.getStatusId(),
-            InterfaceRole.ADMIN, InterfaceStatusTransitionStatus.ACTIVE, user.getUserId()));
+            InterfaceRole.ADMIN, InterfaceStatusTransitionStatus.ACTIVE, user.getUserId())));
 
     interfaceStatusTransitionService.delete(created.transitionId());
 

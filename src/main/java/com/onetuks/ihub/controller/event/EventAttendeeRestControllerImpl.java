@@ -3,6 +3,7 @@ package com.onetuks.ihub.controller.event;
 import com.onetuks.ihub.dto.event.EventAttendeeCreateRequest;
 import com.onetuks.ihub.dto.event.EventAttendeeResponse;
 import com.onetuks.ihub.dto.event.EventAttendeeUpdateRequest;
+import com.onetuks.ihub.mapper.EventAttendeeMapper;
 import com.onetuks.ihub.service.event.EventAttendeeService;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -22,25 +23,29 @@ public class EventAttendeeRestControllerImpl implements EventAttendeeRestControl
   @Override
   public ResponseEntity<EventAttendeeResponse> createEventAttendee(
       @Valid @RequestBody EventAttendeeCreateRequest request) {
-    EventAttendeeResponse response = eventAttendeeService.create(request);
+    EventAttendeeResponse response =
+        EventAttendeeMapper.toResponse(eventAttendeeService.create(request));
     return ResponseEntity.created(URI.create("/api/event-attendees/" + response.eventAttendeeId()))
         .body(response);
   }
 
   @Override
   public ResponseEntity<EventAttendeeResponse> getEventAttendee(Long eventAttendeeId) {
-    return ResponseEntity.ok(eventAttendeeService.getById(eventAttendeeId));
+    return ResponseEntity.ok(
+        EventAttendeeMapper.toResponse(eventAttendeeService.getById(eventAttendeeId)));
   }
 
   @Override
   public ResponseEntity<List<EventAttendeeResponse>> getEventAttendees() {
-    return ResponseEntity.ok(eventAttendeeService.getAll());
+    return ResponseEntity.ok(
+        eventAttendeeService.getAll().stream().map(EventAttendeeMapper::toResponse).toList());
   }
 
   @Override
   public ResponseEntity<EventAttendeeResponse> updateEventAttendee(
       Long eventAttendeeId, @Valid @RequestBody EventAttendeeUpdateRequest request) {
-    return ResponseEntity.ok(eventAttendeeService.update(eventAttendeeId, request));
+    return ResponseEntity.ok(
+        EventAttendeeMapper.toResponse(eventAttendeeService.update(eventAttendeeId, request)));
   }
 
   @Override

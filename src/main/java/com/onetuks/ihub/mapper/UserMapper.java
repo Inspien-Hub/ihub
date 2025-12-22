@@ -28,6 +28,7 @@ public final class UserMapper {
 
   public static void applyCreate(User user, UserCreateRequest request) {
     LocalDateTime now = LocalDateTime.now();
+    user.setUserId(UUIDProvider.provideUUID(User.TABLE_NAME));
     user.setEmail(request.email());
     user.setPassword(request.password());
     user.setName(request.name());

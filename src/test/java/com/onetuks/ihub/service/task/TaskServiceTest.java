@@ -13,6 +13,7 @@ import com.onetuks.ihub.entity.task.TaskPriority;
 import com.onetuks.ihub.entity.task.TaskStatus;
 import com.onetuks.ihub.entity.task.TaskType;
 import com.onetuks.ihub.entity.user.User;
+import com.onetuks.ihub.mapper.TaskMapper;
 import com.onetuks.ihub.repository.ProjectJpaRepository;
 import com.onetuks.ihub.repository.TaskJpaRepository;
 import com.onetuks.ihub.repository.UserJpaRepository;
@@ -76,7 +77,7 @@ class TaskServiceTest {
         10,
         user.getUserId());
 
-    TaskResponse response = taskService.create(request);
+    TaskResponse response = TaskMapper.toResponse(taskService.create(request));
 
     assertNotNull(response.taskId());
     assertEquals("Task 1", response.title());
@@ -85,9 +86,9 @@ class TaskServiceTest {
 
   @Test
   void updateTask_success() {
-    TaskResponse created = taskService.create(new TaskCreateRequest(
+    TaskResponse created = TaskMapper.toResponse(taskService.create(new TaskCreateRequest(
         project.getProjectId(), null, TaskType.PARENT, null, "Task 2", null, TaskStatus.REQUEST,
-        user.getUserId(), user.getUserId(), null, null, TaskPriority.MEDIUM, 0, user.getUserId()));
+        user.getUserId(), user.getUserId(), null, null, TaskPriority.MEDIUM, 0, user.getUserId())));
 
     TaskUpdateRequest updateRequest = new TaskUpdateRequest(
         null,
@@ -103,7 +104,7 @@ class TaskServiceTest {
         TaskPriority.LOW,
         50);
 
-    TaskResponse updated = taskService.update(created.taskId(), updateRequest);
+    TaskResponse updated = TaskMapper.toResponse(taskService.update(created.taskId(), updateRequest));
 
     assertEquals(TaskType.GENERAL_CHILD, updated.taskType());
     assertEquals(TaskStatus.IN_PROGRESS, updated.status());
@@ -124,9 +125,9 @@ class TaskServiceTest {
 
   @Test
   void deleteTask_success() {
-    TaskResponse created = taskService.create(new TaskCreateRequest(
+    TaskResponse created = TaskMapper.toResponse(taskService.create(new TaskCreateRequest(
         project.getProjectId(), null, TaskType.PARENT, null, "T3", null, TaskStatus.REQUEST,
-        null, null, null, null, null, null, null));
+        null, null, null, null, null, null, null)));
 
     taskService.delete(created.taskId());
 

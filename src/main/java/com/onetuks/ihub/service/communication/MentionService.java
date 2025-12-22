@@ -1,7 +1,6 @@
 package com.onetuks.ihub.service.communication;
 
 import com.onetuks.ihub.dto.communication.MentionCreateRequest;
-import com.onetuks.ihub.dto.communication.MentionResponse;
 import com.onetuks.ihub.dto.communication.MentionUpdateRequest;
 import com.onetuks.ihub.entity.communication.Mention;
 import com.onetuks.ihub.entity.project.Project;
@@ -25,30 +24,27 @@ public class MentionService {
   private final UserJpaRepository userJpaRepository;
 
   @Transactional
-  public MentionResponse create(MentionCreateRequest request) {
+  public Mention create(MentionCreateRequest request) {
     Mention mention = new Mention();
     MentionMapper.applyCreate(mention, request);
     mention.setProject(findProject(request.projectId()));
     mention.setMentionedUser(findUser(request.mentionedUserId()));
     mention.setCreatedBy(findUser(request.createdById()));
-    Mention saved = mentionJpaRepository.save(mention);
-    return MentionMapper.toResponse(saved);
+    return mentionJpaRepository.save(mention);
   }
 
   @Transactional(readOnly = true)
-  public MentionResponse getById(Long mentionId) {
-    return MentionMapper.toResponse(findEntity(mentionId));
+  public Mention getById(Long mentionId) {
+    return findEntity(mentionId);
   }
 
   @Transactional(readOnly = true)
-  public List<MentionResponse> getAll() {
-    return mentionJpaRepository.findAll().stream()
-        .map(MentionMapper::toResponse)
-        .toList();
+  public List<Mention> getAll() {
+    return mentionJpaRepository.findAll();
   }
 
   @Transactional
-  public MentionResponse update(Long mentionId, MentionUpdateRequest request) {
+  public Mention update(Long mentionId, MentionUpdateRequest request) {
     Mention mention = findEntity(mentionId);
     MentionMapper.applyUpdate(mention, request);
     if (request.mentionedUserId() != null) {
@@ -57,7 +53,7 @@ public class MentionService {
     if (request.createdById() != null) {
       mention.setCreatedBy(findUser(request.createdById()));
     }
-    return MentionMapper.toResponse(mention);
+    return mention;
   }
 
   @Transactional

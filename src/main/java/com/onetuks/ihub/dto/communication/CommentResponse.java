@@ -4,13 +4,13 @@ import com.onetuks.ihub.entity.communication.TargetType;
 import java.time.LocalDateTime;
 
 public record CommentResponse(
-    Long commentId,
-    Long projectId,
-    Long parentCommentId,
+    String commentId,
+    String projectId,
+    String parentCommentId,
     TargetType targetType,
-    Long targetId,
+    String targetId,
     String content,
-    Long createdById,
+    String createdById,
     LocalDateTime createdAt,
     LocalDateTime updatedAt
 ) {

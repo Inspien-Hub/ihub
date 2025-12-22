@@ -3,11 +3,11 @@ package com.onetuks.ihub.dto.communication;
 import java.time.LocalDateTime;
 
 public record PostResponse(
-    Long postId,
-    Long projectId,
+    String postId,
+    String projectId,
     String title,
     String content,
-    Long createdById,
+    String createdById,
     LocalDateTime createdAt,
     LocalDateTime updatedAt
 ) {

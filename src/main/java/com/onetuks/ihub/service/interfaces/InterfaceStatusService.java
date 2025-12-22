@@ -1,7 +1,6 @@
 package com.onetuks.ihub.service.interfaces;
 
 import com.onetuks.ihub.dto.interfaces.InterfaceStatusCreateRequest;
-import com.onetuks.ihub.dto.interfaces.InterfaceStatusResponse;
 import com.onetuks.ihub.dto.interfaces.InterfaceStatusUpdateRequest;
 import com.onetuks.ihub.entity.interfaces.InterfaceStatus;
 import com.onetuks.ihub.entity.project.Project;
@@ -22,31 +21,28 @@ public class InterfaceStatusService {
   private final ProjectJpaRepository projectJpaRepository;
 
   @Transactional
-  public InterfaceStatusResponse create(InterfaceStatusCreateRequest request) {
+  public InterfaceStatus create(InterfaceStatusCreateRequest request) {
     InterfaceStatus status = new InterfaceStatus();
     InterfaceStatusMapper.applyCreate(status, request);
     status.setProject(findProject(request.projectId()));
-    InterfaceStatus saved = interfaceStatusJpaRepository.save(status);
-    return InterfaceStatusMapper.toResponse(saved);
+    return interfaceStatusJpaRepository.save(status);
   }
 
   @Transactional(readOnly = true)
-  public InterfaceStatusResponse getById(Long statusId) {
-    return InterfaceStatusMapper.toResponse(findEntity(statusId));
+  public InterfaceStatus getById(Long statusId) {
+    return findEntity(statusId);
   }
 
   @Transactional(readOnly = true)
-  public List<InterfaceStatusResponse> getAll() {
-    return interfaceStatusJpaRepository.findAll().stream()
-        .map(InterfaceStatusMapper::toResponse)
-        .toList();
+  public List<InterfaceStatus> getAll() {
+    return interfaceStatusJpaRepository.findAll();
   }
 
   @Transactional
-  public InterfaceStatusResponse update(Long statusId, InterfaceStatusUpdateRequest request) {
+  public InterfaceStatus update(Long statusId, InterfaceStatusUpdateRequest request) {
     InterfaceStatus status = findEntity(statusId);
     InterfaceStatusMapper.applyUpdate(status, request);
-    return InterfaceStatusMapper.toResponse(status);
+    return status;
   }
 
   @Transactional

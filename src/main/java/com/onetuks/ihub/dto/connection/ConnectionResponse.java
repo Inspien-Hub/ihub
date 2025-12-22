@@ -5,9 +5,9 @@ import com.onetuks.ihub.entity.connection.Protocol;
 import java.time.LocalDateTime;
 
 public record ConnectionResponse(
-    Long connectionId,
-    Long projectId,
-    Long systemId,
+    String connectionId,
+    String projectId,
+    String systemId,
     String name,
     Protocol protocol,
     String host,
@@ -18,8 +18,8 @@ public record ConnectionResponse(
     String extraConfig,
     ConnectionStatus status,
     String description,
-    Long createdById,
-    Long updatedById,
+    String createdById,
+    String updatedById,
     LocalDateTime createdAt,
     LocalDateTime updatedAt
 ) {

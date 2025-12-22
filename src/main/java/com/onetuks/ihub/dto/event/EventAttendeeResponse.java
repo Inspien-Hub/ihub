@@ -3,9 +3,9 @@ package com.onetuks.ihub.dto.event;
 import com.onetuks.ihub.entity.event.EventAttendeeStatus;
 
 public record EventAttendeeResponse(
-    Long eventAttendeeId,
-    Long eventId,
-    Long userId,
+    String eventAttendeeId,
+    String eventId,
+    String userId,
     Boolean isMandatory,
     EventAttendeeStatus attendStatus
 ) {

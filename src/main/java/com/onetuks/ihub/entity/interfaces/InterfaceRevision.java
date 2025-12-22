@@ -4,8 +4,6 @@ import com.onetuks.ihub.entity.user.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -26,9 +24,8 @@ import org.hibernate.type.SqlTypes;
 public class InterfaceRevision {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "revision_id", nullable = false)
-  private Long revisionId;
+  private String revisionId;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "interface_id", referencedColumnName = "interface_id", nullable = false)

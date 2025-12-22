@@ -10,6 +10,7 @@ import com.onetuks.ihub.dto.interfaces.InterfaceStatusResponse;
 import com.onetuks.ihub.dto.interfaces.InterfaceStatusUpdateRequest;
 import com.onetuks.ihub.entity.project.Project;
 import com.onetuks.ihub.entity.user.User;
+import com.onetuks.ihub.mapper.InterfaceStatusMapper;
 import com.onetuks.ihub.repository.InterfaceStatusJpaRepository;
 import com.onetuks.ihub.repository.ProjectJpaRepository;
 import com.onetuks.ihub.repository.UserJpaRepository;
@@ -63,7 +64,8 @@ class InterfaceStatusServiceTest {
         1,
         true);
 
-    InterfaceStatusResponse response = interfaceStatusService.create(request);
+    InterfaceStatusResponse response = InterfaceStatusMapper.toResponse(
+        interfaceStatusService.create(request));
 
     assertNotNull(response.statusId());
     assertEquals("Ready", response.name());
@@ -72,14 +74,15 @@ class InterfaceStatusServiceTest {
 
   @Test
   void updateInterfaceStatus_success() {
-    InterfaceStatusResponse created = interfaceStatusService.create(new InterfaceStatusCreateRequest(
-        project.getProjectId(), "Draft", "DF", 1, true));
+    InterfaceStatusResponse created = InterfaceStatusMapper.toResponse(
+        interfaceStatusService.create(new InterfaceStatusCreateRequest(
+            project.getProjectId(), "Draft", "DF", 1, true)));
 
     InterfaceStatusUpdateRequest updateRequest =
         new InterfaceStatusUpdateRequest("DraftUpdated", "DFU", 2, false);
 
-    InterfaceStatusResponse updated =
-        interfaceStatusService.update(created.statusId(), updateRequest);
+    InterfaceStatusResponse updated = InterfaceStatusMapper.toResponse(
+        interfaceStatusService.update(created.statusId(), updateRequest));
 
     assertEquals("DraftUpdated", updated.name());
     assertEquals(2, updated.seqOrder());
@@ -97,8 +100,9 @@ class InterfaceStatusServiceTest {
 
   @Test
   void deleteInterfaceStatus_success() {
-    InterfaceStatusResponse created = interfaceStatusService.create(new InterfaceStatusCreateRequest(
-        project.getProjectId(), "S3", "S3", 1, true));
+    InterfaceStatusResponse created = InterfaceStatusMapper.toResponse(
+        interfaceStatusService.create(new InterfaceStatusCreateRequest(
+            project.getProjectId(), "S3", "S3", 1, true)));
 
     interfaceStatusService.delete(created.statusId());
 

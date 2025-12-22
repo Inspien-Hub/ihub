@@ -3,6 +3,7 @@ package com.onetuks.ihub.controller.event;
 import com.onetuks.ihub.dto.event.EventCreateRequest;
 import com.onetuks.ihub.dto.event.EventResponse;
 import com.onetuks.ihub.dto.event.EventUpdateRequest;
+import com.onetuks.ihub.mapper.EventMapper;
 import com.onetuks.ihub.service.event.EventService;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -22,25 +23,25 @@ public class EventRestControllerImpl implements EventRestController {
   @Override
   public ResponseEntity<EventResponse> createEvent(
       @Valid @RequestBody EventCreateRequest request) {
-    EventResponse response = eventService.create(request);
+    EventResponse response = EventMapper.toResponse(eventService.create(request));
     return ResponseEntity.created(URI.create("/api/events/" + response.eventId()))
         .body(response);
   }
 
   @Override
   public ResponseEntity<EventResponse> getEvent(@PathVariable Long eventId) {
-    return ResponseEntity.ok(eventService.getById(eventId));
+    return ResponseEntity.ok(EventMapper.toResponse(eventService.getById(eventId)));
   }
 
   @Override
   public ResponseEntity<List<EventResponse>> getEvents() {
-    return ResponseEntity.ok(eventService.getAll());
+    return ResponseEntity.ok(eventService.getAll().stream().map(EventMapper::toResponse).toList());
   }
 
   @Override
   public ResponseEntity<EventResponse> updateEvent(
       @PathVariable Long eventId, @Valid @RequestBody EventUpdateRequest request) {
-    return ResponseEntity.ok(eventService.update(eventId, request));
+    return ResponseEntity.ok(EventMapper.toResponse(eventService.update(eventId, request)));
   }
 
   @Override

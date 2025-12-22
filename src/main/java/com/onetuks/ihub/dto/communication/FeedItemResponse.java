@@ -4,12 +4,12 @@ import com.onetuks.ihub.entity.communication.TargetType;
 import java.time.LocalDateTime;
 
 public record FeedItemResponse(
-    Long feedId,
-    Long projectId,
+    String feedId,
+    String projectId,
     String eventType,
-    Long actorId,
+    String actorId,
     TargetType targetType,
-    Long targetId,
+    String targetId,
     String summary,
     LocalDateTime createdAt
 ) {

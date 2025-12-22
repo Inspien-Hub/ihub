@@ -4,9 +4,9 @@ import com.onetuks.ihub.entity.project.ProjectMemberRole;
 import java.time.LocalDateTime;
 
 public record ProjectMemberResponse(
-    Long projectMemberId,
-    Long projectId,
-    Long userId,
+    String projectMemberId,
+    String projectId,
+    String userId,
     ProjectMemberRole role,
     LocalDateTime joinedAt,
     LocalDateTime leftAt

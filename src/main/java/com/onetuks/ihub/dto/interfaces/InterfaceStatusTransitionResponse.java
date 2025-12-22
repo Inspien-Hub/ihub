@@ -5,13 +5,13 @@ import com.onetuks.ihub.entity.interfaces.InterfaceStatusTransitionStatus;
 import java.time.LocalDateTime;
 
 public record InterfaceStatusTransitionResponse(
-    Long transitionId,
-    Long projectId,
-    Long fromStatusId,
-    Long toStatusId,
+    String transitionId,
+    String projectId,
+    String fromStatusId,
+    String toStatusId,
     InterfaceRole allowedRole,
     InterfaceStatusTransitionStatus status,
     LocalDateTime createdAt,
-    Long createdById
+    String createdById
 ) {
 }

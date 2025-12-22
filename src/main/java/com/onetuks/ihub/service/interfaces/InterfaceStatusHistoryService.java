@@ -1,7 +1,6 @@
 package com.onetuks.ihub.service.interfaces;
 
 import com.onetuks.ihub.dto.interfaces.InterfaceStatusHistoryCreateRequest;
-import com.onetuks.ihub.dto.interfaces.InterfaceStatusHistoryResponse;
 import com.onetuks.ihub.dto.interfaces.InterfaceStatusHistoryUpdateRequest;
 import com.onetuks.ihub.entity.interfaces.Interface;
 import com.onetuks.ihub.entity.interfaces.InterfaceStatus;
@@ -31,7 +30,7 @@ public class InterfaceStatusHistoryService {
   private final TaskJpaRepository taskJpaRepository;
 
   @Transactional
-  public InterfaceStatusHistoryResponse create(InterfaceStatusHistoryCreateRequest request) {
+  public InterfaceStatusHistory create(InterfaceStatusHistoryCreateRequest request) {
     InterfaceStatusHistory history = new InterfaceStatusHistory();
     InterfaceStatusHistoryMapper.applyCreate(history, request);
     history.setAnInterface(findInterface(request.interfaceId()));
@@ -39,31 +38,28 @@ public class InterfaceStatusHistoryService {
     history.setToStatus(findStatus(request.toStatusId()));
     history.setChangedBy(findUser(request.changedById()));
     history.setRelatedTask(findTask(request.relatedTaskId()));
-    InterfaceStatusHistory saved = interfaceStatusHistoryJpaRepository.save(history);
-    return InterfaceStatusHistoryMapper.toResponse(saved);
+    return interfaceStatusHistoryJpaRepository.save(history);
   }
 
   @Transactional(readOnly = true)
-  public InterfaceStatusHistoryResponse getById(Long historyId) {
-    return InterfaceStatusHistoryMapper.toResponse(findEntity(historyId));
+  public InterfaceStatusHistory getById(Long historyId) {
+    return findEntity(historyId);
   }
 
   @Transactional(readOnly = true)
-  public List<InterfaceStatusHistoryResponse> getAll() {
-    return interfaceStatusHistoryJpaRepository.findAll().stream()
-        .map(InterfaceStatusHistoryMapper::toResponse)
-        .toList();
+  public List<InterfaceStatusHistory> getAll() {
+    return interfaceStatusHistoryJpaRepository.findAll();
   }
 
   @Transactional
-  public InterfaceStatusHistoryResponse update(
+  public InterfaceStatusHistory update(
       Long historyId, InterfaceStatusHistoryUpdateRequest request) {
     InterfaceStatusHistory history = findEntity(historyId);
     InterfaceStatusHistoryMapper.applyUpdate(history, request);
     if (request.toStatusId() != null) {
       history.setToStatus(findStatus(request.toStatusId()));
     }
-    return InterfaceStatusHistoryMapper.toResponse(history);
+    return history;
   }
 
   @Transactional

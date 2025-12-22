@@ -11,6 +11,7 @@ import com.onetuks.ihub.dto.communication.CommentUpdateRequest;
 import com.onetuks.ihub.entity.communication.TargetType;
 import com.onetuks.ihub.entity.project.Project;
 import com.onetuks.ihub.entity.user.User;
+import com.onetuks.ihub.mapper.CommentMapper;
 import com.onetuks.ihub.repository.CommentJpaRepository;
 import com.onetuks.ihub.repository.ProjectJpaRepository;
 import com.onetuks.ihub.repository.UserJpaRepository;
@@ -65,7 +66,7 @@ class CommentServiceTest {
         "Hello",
         author.getUserId());
 
-    CommentResponse response = commentService.create(request);
+    CommentResponse response = CommentMapper.toResponse(commentService.create(request));
 
     assertNotNull(response.commentId());
     assertEquals("Hello", response.content());
@@ -74,13 +75,13 @@ class CommentServiceTest {
 
   @Test
   void updateComment_success() {
-    CommentResponse created = commentService.create(new CommentCreateRequest(
-        project.getProjectId(), null, TargetType.POST, 1L, "Old", author.getUserId()));
+    CommentResponse created = CommentMapper.toResponse(commentService.create(new CommentCreateRequest(
+        project.getProjectId(), null, TargetType.POST, 1L, "Old", author.getUserId())));
 
     CommentUpdateRequest updateRequest =
         new CommentUpdateRequest(TargetType.TASK, 2L, "Updated");
 
-    CommentResponse updated = commentService.update(created.commentId(), updateRequest);
+    CommentResponse updated = CommentMapper.toResponse(commentService.update(created.commentId(), updateRequest));
 
     assertEquals(TargetType.TASK, updated.targetType());
     assertEquals(2L, updated.targetId());
@@ -99,8 +100,8 @@ class CommentServiceTest {
 
   @Test
   void deleteComment_success() {
-    CommentResponse created = commentService.create(new CommentCreateRequest(
-        project.getProjectId(), null, TargetType.POST, 1L, "C", author.getUserId()));
+    CommentResponse created = CommentMapper.toResponse(commentService.create(new CommentCreateRequest(
+        project.getProjectId(), null, TargetType.POST, 1L, "C", author.getUserId())));
 
     commentService.delete(created.commentId());
 

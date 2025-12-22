@@ -11,6 +11,7 @@ import com.onetuks.ihub.dto.project.ProjectMemberUpdateRequest;
 import com.onetuks.ihub.entity.project.Project;
 import com.onetuks.ihub.entity.project.ProjectMemberRole;
 import com.onetuks.ihub.entity.user.User;
+import com.onetuks.ihub.mapper.ProjectMemberMapper;
 import com.onetuks.ihub.repository.ProjectJpaRepository;
 import com.onetuks.ihub.repository.ProjectMemberJpaRepository;
 import com.onetuks.ihub.repository.UserJpaRepository;
@@ -65,7 +66,8 @@ class ProjectMemberServiceTest {
         LocalDateTime.now(),
         null);
 
-    ProjectMemberResponse response = projectMemberService.create(request);
+    ProjectMemberResponse response =
+        ProjectMemberMapper.toResponse(projectMemberService.create(request));
 
     assertNotNull(response.projectMemberId());
     assertEquals(ProjectMemberRole.MEMBER, response.role());
@@ -73,15 +75,16 @@ class ProjectMemberServiceTest {
 
   @Test
   void updateProjectMember_success() {
-    ProjectMemberResponse created = projectMemberService.create(new ProjectMemberCreateRequest(
-        project.getProjectId(), user.getUserId(), ProjectMemberRole.MEMBER,
-        LocalDateTime.now(), null));
+    ProjectMemberResponse created = ProjectMemberMapper.toResponse(projectMemberService.create(
+        new ProjectMemberCreateRequest(
+            project.getProjectId(), user.getUserId(), ProjectMemberRole.MEMBER,
+            LocalDateTime.now(), null)));
 
     ProjectMemberUpdateRequest updateRequest =
         new ProjectMemberUpdateRequest(ProjectMemberRole.ADMIN, LocalDateTime.now());
 
-    ProjectMemberResponse updated =
-        projectMemberService.update(created.projectMemberId(), updateRequest);
+    ProjectMemberResponse updated = ProjectMemberMapper.toResponse(
+        projectMemberService.update(created.projectMemberId(), updateRequest));
 
     assertEquals(ProjectMemberRole.ADMIN, updated.role());
     assertNotNull(updated.leftAt());
@@ -99,8 +102,9 @@ class ProjectMemberServiceTest {
 
   @Test
   void deleteProjectMember_success() {
-    ProjectMemberResponse created = projectMemberService.create(new ProjectMemberCreateRequest(
-        project.getProjectId(), user.getUserId(), ProjectMemberRole.MEMBER, null, null));
+    ProjectMemberResponse created = ProjectMemberMapper.toResponse(projectMemberService.create(
+        new ProjectMemberCreateRequest(
+            project.getProjectId(), user.getUserId(), ProjectMemberRole.MEMBER, null, null)));
 
     projectMemberService.delete(created.projectMemberId());
 

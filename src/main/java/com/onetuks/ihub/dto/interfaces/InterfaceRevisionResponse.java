@@ -4,10 +4,10 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 public record InterfaceRevisionResponse(
-    Long revisionId,
-    Long interfaceId,
+    String revisionId,
+    String interfaceId,
     Integer versionNo,
-    Long changedById,
+    String changedById,
     LocalDateTime changedAt,
     Map<String, String> snapshot,
     String reason

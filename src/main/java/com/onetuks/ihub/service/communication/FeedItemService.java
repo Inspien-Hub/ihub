@@ -1,7 +1,6 @@
 package com.onetuks.ihub.service.communication;
 
 import com.onetuks.ihub.dto.communication.FeedItemCreateRequest;
-import com.onetuks.ihub.dto.communication.FeedItemResponse;
 import com.onetuks.ihub.dto.communication.FeedItemUpdateRequest;
 import com.onetuks.ihub.entity.communication.FeedItem;
 import com.onetuks.ihub.entity.project.Project;
@@ -25,37 +24,34 @@ public class FeedItemService {
   private final UserJpaRepository userJpaRepository;
 
   @Transactional
-  public FeedItemResponse create(FeedItemCreateRequest request) {
+  public FeedItem create(FeedItemCreateRequest request) {
     FeedItem feedItem = new FeedItem();
     FeedItemMapper.applyCreate(feedItem, request);
     feedItem.setProject(findProject(request.projectId()));
     if (request.actorId() != null) {
       feedItem.setActor(findUser(request.actorId()));
     }
-    FeedItem saved = feedItemJpaRepository.save(feedItem);
-    return FeedItemMapper.toResponse(saved);
+    return feedItemJpaRepository.save(feedItem);
   }
 
   @Transactional(readOnly = true)
-  public FeedItemResponse getById(Long feedItemId) {
-    return FeedItemMapper.toResponse(findEntity(feedItemId));
+  public FeedItem getById(Long feedItemId) {
+    return findEntity(feedItemId);
   }
 
   @Transactional(readOnly = true)
-  public List<FeedItemResponse> getAll() {
-    return feedItemJpaRepository.findAll().stream()
-        .map(FeedItemMapper::toResponse)
-        .toList();
+  public List<FeedItem> getAll() {
+    return feedItemJpaRepository.findAll();
   }
 
   @Transactional
-  public FeedItemResponse update(Long feedItemId, FeedItemUpdateRequest request) {
+  public FeedItem update(Long feedItemId, FeedItemUpdateRequest request) {
     FeedItem feedItem = findEntity(feedItemId);
     FeedItemMapper.applyUpdate(feedItem, request);
     if (request.actorId() != null) {
       feedItem.setActor(findUser(request.actorId()));
     }
-    return FeedItemMapper.toResponse(feedItem);
+    return feedItem;
   }
 
   @Transactional

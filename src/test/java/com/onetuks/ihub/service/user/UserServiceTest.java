@@ -10,6 +10,7 @@ import com.onetuks.ihub.dto.user.UserResponse;
 import com.onetuks.ihub.dto.user.UserUpdateRequest;
 import com.onetuks.ihub.entity.user.UserRole;
 import com.onetuks.ihub.entity.user.UserStatus;
+import com.onetuks.ihub.mapper.UserMapper;
 import com.onetuks.ihub.repository.UserJpaRepository;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
@@ -38,7 +39,7 @@ class UserServiceTest {
   void createUser_success() {
     UserCreateRequest request = createRequest("user1@example.com", "User One");
 
-    UserResponse response = userService.create(request);
+    UserResponse response = UserMapper.toResponse(userService.create(request));
 
     assertNotNull(response.userId());
     assertEquals("user1@example.com", response.email());
@@ -50,7 +51,8 @@ class UserServiceTest {
 
   @Test
   void updateUser_success() {
-    UserResponse created = userService.create(createRequest("user2@example.com", "User Two"));
+    UserResponse created = UserMapper.toResponse(userService.create(
+        createRequest("user2@example.com", "User Two")));
     UserUpdateRequest updateRequest = new UserUpdateRequest(
         "user2_new@example.com",
         "newPass",
@@ -62,7 +64,7 @@ class UserServiceTest {
         UserStatus.INACTIVE,
         UserRole.LEGACY);
 
-    UserResponse updated = userService.update(created.userId(), updateRequest);
+    UserResponse updated = UserMapper.toResponse(userService.update(created.userId(), updateRequest));
 
     assertEquals("user2_new@example.com", updated.email());
     assertEquals("User Two Updated", updated.name());
@@ -79,14 +81,15 @@ class UserServiceTest {
     userService.create(createRequest("a@example.com", "A"));
     userService.create(createRequest("b@example.com", "B"));
 
-    List<UserResponse> responses = userService.getAll();
+    List<UserResponse> responses = userService.getAll().stream().map(UserMapper::toResponse).toList();
 
     assertEquals(2, responses.size());
   }
 
   @Test
   void deleteUser_success() {
-    UserResponse created = userService.create(createRequest("user3@example.com", "User Three"));
+    UserResponse created = UserMapper.toResponse(userService.create(
+        createRequest("user3@example.com", "User Three")));
 
     userService.delete(created.userId());
 

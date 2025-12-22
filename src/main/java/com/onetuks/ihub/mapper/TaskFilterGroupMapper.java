@@ -29,6 +29,7 @@ public final class TaskFilterGroupMapper {
 
   public static void applyCreate(TaskFilterGroup group, TaskFilterGroupCreateRequest request) {
     LocalDateTime now = LocalDateTime.now();
+    group.setGroupId(UUIDProvider.provideUUID(TaskFilterGroup.TABLE_NAME));
     group.setName(request.name());
     group.setAssigneeKeyword(request.assigneeKeyword());
     group.setAuthorKeyword(request.authorKeyword());

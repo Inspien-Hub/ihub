@@ -11,6 +11,7 @@ import com.onetuks.ihub.dto.communication.MentionUpdateRequest;
 import com.onetuks.ihub.entity.communication.TargetType;
 import com.onetuks.ihub.entity.project.Project;
 import com.onetuks.ihub.entity.user.User;
+import com.onetuks.ihub.mapper.MentionMapper;
 import com.onetuks.ihub.repository.MentionJpaRepository;
 import com.onetuks.ihub.repository.ProjectJpaRepository;
 import com.onetuks.ihub.repository.UserJpaRepository;
@@ -66,7 +67,7 @@ class MentionServiceTest {
         mentioned.getUserId(),
         creator.getUserId());
 
-    MentionResponse response = mentionService.create(request);
+    MentionResponse response = MentionMapper.toResponse(mentionService.create(request));
 
     assertNotNull(response.mentionId());
     assertEquals(TargetType.POST, response.targetType());
@@ -75,13 +76,13 @@ class MentionServiceTest {
 
   @Test
   void updateMention_success() {
-    MentionResponse created = mentionService.create(new MentionCreateRequest(
-        project.getProjectId(), TargetType.POST, 1L, mentioned.getUserId(), creator.getUserId()));
+    MentionResponse created = MentionMapper.toResponse(mentionService.create(new MentionCreateRequest(
+        project.getProjectId(), TargetType.POST, 1L, mentioned.getUserId(), creator.getUserId())));
 
     MentionUpdateRequest updateRequest =
         new MentionUpdateRequest(TargetType.TASK, 2L, creator.getUserId(), mentioned.getUserId());
 
-    MentionResponse updated = mentionService.update(created.mentionId(), updateRequest);
+    MentionResponse updated = MentionMapper.toResponse(mentionService.update(created.mentionId(), updateRequest));
 
     assertEquals(TargetType.TASK, updated.targetType());
     assertEquals(2L, updated.targetId());
@@ -100,8 +101,8 @@ class MentionServiceTest {
 
   @Test
   void deleteMention_success() {
-    MentionResponse created = mentionService.create(new MentionCreateRequest(
-        project.getProjectId(), TargetType.POST, 1L, mentioned.getUserId(), creator.getUserId()));
+    MentionResponse created = MentionMapper.toResponse(mentionService.create(new MentionCreateRequest(
+        project.getProjectId(), TargetType.POST, 1L, mentioned.getUserId(), creator.getUserId())));
 
     mentionService.delete(created.mentionId());
 

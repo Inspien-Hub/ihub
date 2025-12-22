@@ -1,7 +1,6 @@
 package com.onetuks.ihub.service.user;
 
 import com.onetuks.ihub.dto.user.UserCreateRequest;
-import com.onetuks.ihub.dto.user.UserResponse;
 import com.onetuks.ihub.dto.user.UserUpdateRequest;
 import com.onetuks.ihub.entity.user.User;
 import com.onetuks.ihub.mapper.UserMapper;
@@ -19,30 +18,27 @@ public class UserService {
   private final UserJpaRepository userJpaRepository;
 
   @Transactional
-  public UserResponse create(UserCreateRequest request) {
+  public User create(UserCreateRequest request) {
     User user = new User();
     UserMapper.applyCreate(user, request);
-    User saved = userJpaRepository.save(user);
-    return UserMapper.toResponse(saved);
+    return userJpaRepository.save(user);
   }
 
   @Transactional(readOnly = true)
-  public UserResponse getById(Long userId) {
-    return UserMapper.toResponse(findEntity(userId));
+  public User getById(Long userId) {
+    return findEntity(userId);
   }
 
   @Transactional(readOnly = true)
-  public List<UserResponse> getAll() {
-    return userJpaRepository.findAll().stream()
-        .map(UserMapper::toResponse)
-        .toList();
+  public List<User> getAll() {
+    return userJpaRepository.findAll();
   }
 
   @Transactional
-  public UserResponse update(Long userId, UserUpdateRequest request) {
+  public User update(Long userId, UserUpdateRequest request) {
     User user = findEntity(userId);
     UserMapper.applyUpdate(user, request);
-    return UserMapper.toResponse(user);
+    return user;
   }
 
   @Transactional

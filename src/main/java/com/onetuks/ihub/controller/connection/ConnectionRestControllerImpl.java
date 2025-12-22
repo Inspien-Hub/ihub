@@ -3,6 +3,7 @@ package com.onetuks.ihub.controller.connection;
 import com.onetuks.ihub.dto.connection.ConnectionCreateRequest;
 import com.onetuks.ihub.dto.connection.ConnectionResponse;
 import com.onetuks.ihub.dto.connection.ConnectionUpdateRequest;
+import com.onetuks.ihub.mapper.ConnectionMapper;
 import com.onetuks.ihub.service.connection.ConnectionService;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -22,25 +23,27 @@ public class ConnectionRestControllerImpl implements ConnectionRestController {
   @Override
   public ResponseEntity<ConnectionResponse> createConnection(
       @Valid @RequestBody ConnectionCreateRequest request) {
-    ConnectionResponse response = connectionService.create(request);
+    ConnectionResponse response = ConnectionMapper.toResponse(connectionService.create(request));
     return ResponseEntity.created(URI.create("/api/connections/" + response.connectionId()))
         .body(response);
   }
 
   @Override
   public ResponseEntity<ConnectionResponse> getConnection(@PathVariable Long connectionId) {
-    return ResponseEntity.ok(connectionService.getById(connectionId));
+    return ResponseEntity.ok(ConnectionMapper.toResponse(connectionService.getById(connectionId)));
   }
 
   @Override
   public ResponseEntity<List<ConnectionResponse>> getConnections() {
-    return ResponseEntity.ok(connectionService.getAll());
+    return ResponseEntity.ok(
+        connectionService.getAll().stream().map(ConnectionMapper::toResponse).toList());
   }
 
   @Override
   public ResponseEntity<ConnectionResponse> updateConnection(
       @PathVariable Long connectionId, @Valid @RequestBody ConnectionUpdateRequest request) {
-    return ResponseEntity.ok(connectionService.update(connectionId, request));
+    return ResponseEntity.ok(
+        ConnectionMapper.toResponse(connectionService.update(connectionId, request)));
   }
 
   @Override

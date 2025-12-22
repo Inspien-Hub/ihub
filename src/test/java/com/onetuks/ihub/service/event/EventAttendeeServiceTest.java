@@ -12,6 +12,8 @@ import com.onetuks.ihub.dto.event.EventCreateRequest;
 import com.onetuks.ihub.entity.event.EventAttendeeStatus;
 import com.onetuks.ihub.entity.project.Project;
 import com.onetuks.ihub.entity.user.User;
+import com.onetuks.ihub.mapper.EventAttendeeMapper;
+import com.onetuks.ihub.mapper.EventMapper;
 import com.onetuks.ihub.repository.EventAttendeeJpaRepository;
 import com.onetuks.ihub.repository.EventJpaRepository;
 import com.onetuks.ihub.repository.ProjectJpaRepository;
@@ -58,9 +60,9 @@ class EventAttendeeServiceTest {
     creator = ServiceTestDataFactory.createUser(userJpaRepository, "event.creator@test.com", "Creator");
     attendeeUser = ServiceTestDataFactory.createUser(userJpaRepository, "event.attendee@test.com", "Attendee");
     project = ServiceTestDataFactory.createProject(projectJpaRepository, creator, creator, "EventAttendeeProj");
-    eventId = eventService.create(new EventCreateRequest(
+    eventId = EventMapper.toResponse(eventService.create(new EventCreateRequest(
         project.getProjectId(), "Session", LocalDateTime.now(), LocalDateTime.now().plusHours(1),
-        "Room", "desc", 5, creator.getUserId())).eventId();
+        "Room", "desc", 5, creator.getUserId()))).eventId();
   }
 
   @AfterEach
@@ -79,7 +81,8 @@ class EventAttendeeServiceTest {
         true,
         EventAttendeeStatus.ACCEPTED);
 
-    EventAttendeeResponse response = eventAttendeeService.create(request);
+    EventAttendeeResponse response =
+        EventAttendeeMapper.toResponse(eventAttendeeService.create(request));
 
     assertNotNull(response.eventAttendeeId());
     assertEquals(attendeeUser.getUserId(), response.userId());
@@ -88,14 +91,15 @@ class EventAttendeeServiceTest {
 
   @Test
   void updateEventAttendee_success() {
-    EventAttendeeResponse created = eventAttendeeService.create(new EventAttendeeCreateRequest(
-        eventId, attendeeUser.getUserId(), false, EventAttendeeStatus.INVITED));
+    EventAttendeeResponse created = EventAttendeeMapper.toResponse(
+        eventAttendeeService.create(new EventAttendeeCreateRequest(
+            eventId, attendeeUser.getUserId(), false, EventAttendeeStatus.INVITED)));
 
     EventAttendeeUpdateRequest updateRequest = new EventAttendeeUpdateRequest(
         true, EventAttendeeStatus.ACCEPTED);
 
-    EventAttendeeResponse updated =
-        eventAttendeeService.update(created.eventAttendeeId(), updateRequest);
+    EventAttendeeResponse updated = EventAttendeeMapper.toResponse(
+        eventAttendeeService.update(created.eventAttendeeId(), updateRequest));
 
     assertEquals(true, updated.isMandatory());
     assertEquals(EventAttendeeStatus.ACCEPTED, updated.attendStatus());
@@ -113,8 +117,9 @@ class EventAttendeeServiceTest {
 
   @Test
   void deleteEventAttendee_success() {
-    EventAttendeeResponse created = eventAttendeeService.create(new EventAttendeeCreateRequest(
-        eventId, attendeeUser.getUserId(), false, EventAttendeeStatus.INVITED));
+    EventAttendeeResponse created = EventAttendeeMapper.toResponse(
+        eventAttendeeService.create(new EventAttendeeCreateRequest(
+            eventId, attendeeUser.getUserId(), false, EventAttendeeStatus.INVITED)));
 
     eventAttendeeService.delete(created.eventAttendeeId());
 

@@ -1,7 +1,6 @@
 package com.onetuks.ihub.service.connection;
 
 import com.onetuks.ihub.dto.connection.ConnectionCreateRequest;
-import com.onetuks.ihub.dto.connection.ConnectionResponse;
 import com.onetuks.ihub.dto.connection.ConnectionUpdateRequest;
 import com.onetuks.ihub.entity.connection.Connection;
 import com.onetuks.ihub.entity.project.Project;
@@ -28,31 +27,28 @@ public class ConnectionService {
   private final UserJpaRepository userJpaRepository;
 
   @Transactional
-  public ConnectionResponse create(ConnectionCreateRequest request) {
+  public Connection create(ConnectionCreateRequest request) {
     Connection connection = new Connection();
     ConnectionMapper.applyCreate(connection, request);
     connection.setProject(findProject(request.projectId()));
     connection.setSystem(findSystem(request.systemId()));
     connection.setCreatedBy(findUser(request.createdById()));
     connection.setUpdatedBy(findUser(request.updatedById()));
-    Connection saved = connectionJpaRepository.save(connection);
-    return ConnectionMapper.toResponse(saved);
+    return connectionJpaRepository.save(connection);
   }
 
   @Transactional(readOnly = true)
-  public ConnectionResponse getById(Long connectionId) {
-    return ConnectionMapper.toResponse(findEntity(connectionId));
+  public Connection getById(Long connectionId) {
+    return findEntity(connectionId);
   }
 
   @Transactional(readOnly = true)
-  public List<ConnectionResponse> getAll() {
-    return connectionJpaRepository.findAll().stream()
-        .map(ConnectionMapper::toResponse)
-        .toList();
+  public List<Connection> getAll() {
+    return connectionJpaRepository.findAll();
   }
 
   @Transactional
-  public ConnectionResponse update(Long connectionId, ConnectionUpdateRequest request) {
+  public Connection update(Long connectionId, ConnectionUpdateRequest request) {
     Connection connection = findEntity(connectionId);
     ConnectionMapper.applyUpdate(connection, request);
     if (request.projectId() != null) {
@@ -64,7 +60,7 @@ public class ConnectionService {
     if (request.updatedById() != null) {
       connection.setUpdatedBy(findUser(request.updatedById()));
     }
-    return ConnectionMapper.toResponse(connection);
+    return connection;
   }
 
   @Transactional

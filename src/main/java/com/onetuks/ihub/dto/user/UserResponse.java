@@ -5,7 +5,7 @@ import com.onetuks.ihub.entity.user.UserStatus;
 import java.time.LocalDateTime;
 
 public record UserResponse(
-    Long userId,
+    String userId,
     String email,
     String name,
     String company,
