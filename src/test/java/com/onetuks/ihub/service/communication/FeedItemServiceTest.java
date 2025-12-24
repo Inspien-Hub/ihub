@@ -65,7 +65,7 @@ class FeedItemServiceTest {
         "CREATE",
         actor.getUserId(),
         TargetType.POST,
-        1L,
+        "1L",
         "summary");
 
     FeedItemResponse response = FeedItemMapper.toResponse(feedItemService.create(request));
@@ -78,13 +78,13 @@ class FeedItemServiceTest {
   @Test
   void updateFeedItem_success() {
     FeedItemResponse created = FeedItemMapper.toResponse(feedItemService.create(new FeedItemCreateRequest(
-        project.getProjectId(), "EVT", actor.getUserId(), TargetType.POST, 1L, "sum")));
+        project.getProjectId(), "EVT", actor.getUserId(), TargetType.POST, "1L", "sum")));
 
     FeedItemUpdateRequest updateRequest = new FeedItemUpdateRequest(
         "UPDATED",
         newActor.getUserId(),
         TargetType.TASK,
-        2L,
+        "2L",
         "updated summary");
 
     FeedItemResponse updated = FeedItemMapper.toResponse(feedItemService.update(created.feedId(), updateRequest));
@@ -97,9 +97,9 @@ class FeedItemServiceTest {
   @Test
   void getFeedItems_returnsAll() {
     feedItemService.create(new FeedItemCreateRequest(
-        project.getProjectId(), "A", actor.getUserId(), TargetType.POST, 1L, "s1"));
+        project.getProjectId(), "A", actor.getUserId(), TargetType.POST, "1L", "s1"));
     feedItemService.create(new FeedItemCreateRequest(
-        project.getProjectId(), "B", actor.getUserId(), TargetType.POST, 1L, "s2"));
+        project.getProjectId(), "B", actor.getUserId(), TargetType.POST, "1L", "s2"));
 
     assertEquals(2, feedItemService.getAll().size());
   }
@@ -107,7 +107,7 @@ class FeedItemServiceTest {
   @Test
   void deleteFeedItem_success() {
     FeedItemResponse created = FeedItemMapper.toResponse(feedItemService.create(new FeedItemCreateRequest(
-        project.getProjectId(), "C", actor.getUserId(), TargetType.POST, 1L, "s3")));
+        project.getProjectId(), "C", actor.getUserId(), TargetType.POST, "1L", "s3")));
 
     feedItemService.delete(created.feedId());
 

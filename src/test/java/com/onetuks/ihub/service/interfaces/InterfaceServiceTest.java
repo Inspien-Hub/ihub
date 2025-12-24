@@ -14,9 +14,6 @@ import com.onetuks.ihub.entity.interfaces.InterfaceStatus;
 import com.onetuks.ihub.entity.interfaces.InterfaceType;
 import com.onetuks.ihub.entity.interfaces.SyncAsyncType;
 import com.onetuks.ihub.entity.project.Project;
-import com.onetuks.ihub.entity.system.SystemEnvironment;
-import com.onetuks.ihub.entity.system.SystemStatus;
-import com.onetuks.ihub.entity.system.SystemType;
 import com.onetuks.ihub.entity.user.User;
 import com.onetuks.ihub.mapper.InterfaceMapper;
 import com.onetuks.ihub.repository.InterfaceJpaRepository;
@@ -26,15 +23,12 @@ import com.onetuks.ihub.repository.SystemJpaRepository;
 import com.onetuks.ihub.repository.UserJpaRepository;
 import com.onetuks.ihub.service.ServiceTestDataFactory;
 import jakarta.persistence.EntityNotFoundException;
-import java.util.List;
-import java.util.stream.IntStream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.testcontainers.shaded.org.checkerframework.common.value.qual.IntRange;
 
 @SpringBootTest
 @Import(TestcontainersConfiguration.class)
@@ -147,14 +141,6 @@ class InterfaceServiceTest {
 
   @Test
   void getInterfaces_returnsAll() {
-    List<Interface> interfaces = IntStream.range(0, 2)
-        .mapToObj(i -> new Interface(
-            project, "IF-" + i, sourceSystem, targetSystem, "M", InterfaceType.REALTIME, "p",
-            ChannelAdapter.HTTP, ChannelAdapter.HTTP, SyncAsyncType.SYNC,
-            status, "b", "r", user
-        ))
-            .toList()
-    interfaceJpaRepository.saveAll()
     Interface anInterface = interfaceService.create(new InterfaceCreateRequest(
         project.getProjectId(), "IF-3", sourceSystem.getSystemId(), targetSystem.getSystemId(),
         "M", InterfaceType.REALTIME, "p",

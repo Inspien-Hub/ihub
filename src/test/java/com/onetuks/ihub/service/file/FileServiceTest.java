@@ -53,7 +53,7 @@ class FileServiceTest {
 
   private Project project;
   private User uploader;
-  private Long folderId;
+  private String folderId;
 
   @BeforeEach
   void setUp() {

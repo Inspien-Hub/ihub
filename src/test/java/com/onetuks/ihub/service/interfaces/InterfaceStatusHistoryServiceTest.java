@@ -64,7 +64,7 @@ class InterfaceStatusHistoryServiceTest {
   private User user;
   private InterfaceStatus fromStatus;
   private InterfaceStatus toStatus;
-  private Long interfaceId;
+  private String interfaceId;
   private Task task;
 
   @BeforeEach

@@ -65,7 +65,7 @@ class InterfaceRevisionServiceTest {
   private com.onetuks.ihub.entity.system.System sourceSystem;
   private com.onetuks.ihub.entity.system.System targetSystem;
   private InterfaceStatus status;
-  private Long interfaceId;
+  private String interfaceId;
 
   @BeforeEach
   void setUp() {

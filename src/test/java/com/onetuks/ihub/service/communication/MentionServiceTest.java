@@ -63,7 +63,7 @@ class MentionServiceTest {
     MentionCreateRequest request = new MentionCreateRequest(
         project.getProjectId(),
         TargetType.POST,
-        1L,
+        "1L",
         mentioned.getUserId(),
         creator.getUserId());
 
@@ -77,24 +77,24 @@ class MentionServiceTest {
   @Test
   void updateMention_success() {
     MentionResponse created = MentionMapper.toResponse(mentionService.create(new MentionCreateRequest(
-        project.getProjectId(), TargetType.POST, 1L, mentioned.getUserId(), creator.getUserId())));
+        project.getProjectId(), TargetType.POST, "1L", mentioned.getUserId(), creator.getUserId())));
 
     MentionUpdateRequest updateRequest =
-        new MentionUpdateRequest(TargetType.TASK, 2L, creator.getUserId(), mentioned.getUserId());
+        new MentionUpdateRequest(TargetType.TASK, "2L", creator.getUserId(), mentioned.getUserId());
 
     MentionResponse updated = MentionMapper.toResponse(mentionService.update(created.mentionId(), updateRequest));
 
     assertEquals(TargetType.TASK, updated.targetType());
-    assertEquals(2L, updated.targetId());
+    assertEquals("2L", updated.targetId());
     assertEquals(creator.getUserId(), updated.mentionedUserId());
   }
 
   @Test
   void getMentions_returnsAll() {
     mentionService.create(new MentionCreateRequest(
-        project.getProjectId(), TargetType.POST, 1L, mentioned.getUserId(), creator.getUserId()));
+        project.getProjectId(), TargetType.POST, "1L", mentioned.getUserId(), creator.getUserId()));
     mentionService.create(new MentionCreateRequest(
-        project.getProjectId(), TargetType.TASK, 2L, creator.getUserId(), creator.getUserId()));
+        project.getProjectId(), TargetType.TASK, "2L", creator.getUserId(), creator.getUserId()));
 
     assertEquals(2, mentionService.getAll().size());
   }
@@ -102,7 +102,7 @@ class MentionServiceTest {
   @Test
   void deleteMention_success() {
     MentionResponse created = MentionMapper.toResponse(mentionService.create(new MentionCreateRequest(
-        project.getProjectId(), TargetType.POST, 1L, mentioned.getUserId(), creator.getUserId())));
+        project.getProjectId(), TargetType.POST, "1L", mentioned.getUserId(), creator.getUserId())));
 
     mentionService.delete(created.mentionId());
 

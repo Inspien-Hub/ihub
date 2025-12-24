@@ -54,7 +54,7 @@ class AttachmentServiceTest {
 
   private Project project;
   private User user;
-  private Long fileId;
+  private String fileId;
 
   @BeforeEach
   void setUp() {
@@ -79,7 +79,7 @@ class AttachmentServiceTest {
         project.getProjectId(),
         fileId,
         TargetType.POST,
-        1L,
+        "1L",
         user.getUserId());
 
     AttachmentResponse response = AttachmentMapper.toResponse(attachmentService.create(request));
@@ -93,14 +93,14 @@ class AttachmentServiceTest {
   void updateAttachment_success() {
     AttachmentResponse created = AttachmentMapper.toResponse(attachmentService.create(
         new AttachmentCreateRequest(
-            project.getProjectId(), fileId, TargetType.POST, 1L, user.getUserId())));
+            project.getProjectId(), fileId, TargetType.POST, "1L", user.getUserId())));
     FileResponse newFile = FileMapper.toResponse(fileService.create(new FileCreateRequest(
         project.getProjectId(), null, FileStatus.ACTIVE, "orig2", "stored2", 20L, "text", user.getUserId())));
 
     AttachmentUpdateRequest updateRequest = new AttachmentUpdateRequest(
         newFile.fileId(),
         TargetType.TASK,
-        2L,
+        "2L",
         user.getUserId());
 
     AttachmentResponse updated =
@@ -114,9 +114,9 @@ class AttachmentServiceTest {
   @Test
   void getAttachments_returnsAll() {
     attachmentService.create(new AttachmentCreateRequest(
-        project.getProjectId(), fileId, TargetType.POST, 1L, user.getUserId()));
+        project.getProjectId(), fileId, TargetType.POST, "1L", user.getUserId()));
     attachmentService.create(new AttachmentCreateRequest(
-        project.getProjectId(), fileId, TargetType.TASK, 2L, user.getUserId()));
+        project.getProjectId(), fileId, TargetType.TASK, "2L", user.getUserId()));
 
     assertEquals(2, attachmentService.getAll().size());
   }
@@ -125,7 +125,7 @@ class AttachmentServiceTest {
   void deleteAttachment_success() {
     AttachmentResponse created = AttachmentMapper.toResponse(attachmentService.create(
         new AttachmentCreateRequest(
-            project.getProjectId(), fileId, TargetType.POST, 1L, user.getUserId())));
+            project.getProjectId(), fileId, TargetType.POST, "1L", user.getUserId())));
 
     attachmentService.delete(created.attachmentId());
 

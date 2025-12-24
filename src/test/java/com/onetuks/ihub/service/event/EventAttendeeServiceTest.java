@@ -53,7 +53,7 @@ class EventAttendeeServiceTest {
   private Project project;
   private User creator;
   private User attendeeUser;
-  private Long eventId;
+  private String eventId;
 
   @BeforeEach
   void setUp() {
