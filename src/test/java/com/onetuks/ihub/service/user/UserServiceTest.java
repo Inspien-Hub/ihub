@@ -53,7 +53,6 @@ class UserServiceTest {
     UserResponse created = UserMapper.toResponse(userService.create(
         createRequest("user2@example.com", "User Two")));
     UserUpdateRequest updateRequest = new UserUpdateRequest(
-        "user2_new@example.com",
         "newPass",
         "User Two Updated",
         "NewCo",
@@ -62,9 +61,10 @@ class UserServiceTest {
         "http://example.com/img.png",
         UserStatus.INACTIVE);
 
-    UserResponse updated = UserMapper.toResponse(userService.update(created.email(), updateRequest));
+    UserResponse updated = UserMapper.toResponse(
+        userService.update(created.email(), updateRequest));
 
-    assertEquals("user2_new@example.com", updated.email());
+    assertEquals("user2@example.com", updated.email());
     assertEquals("User Two Updated", updated.name());
     assertEquals("NewCo", updated.company());
     assertEquals("Lead", updated.position());
@@ -78,7 +78,8 @@ class UserServiceTest {
     userService.create(createRequest("a@example.com", "A"));
     userService.create(createRequest("b@example.com", "B"));
 
-    List<UserResponse> responses = userService.getAll().stream().map(UserMapper::toResponse).toList();
+    List<UserResponse> responses = userService.getAll().stream().map(UserMapper::toResponse)
+        .toList();
 
     assertEquals(2, responses.size());
   }

@@ -39,9 +39,6 @@ public final class UserMapper {
   }
 
   public static void applyUpdate(User user, UserUpdateRequest request) {
-    if (request.email() != null) {
-      user.setEmail(request.email());
-    }
     if (request.password() != null) {
       user.setPassword(request.password());
     }
