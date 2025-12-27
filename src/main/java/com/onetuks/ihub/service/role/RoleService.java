@@ -1,11 +1,14 @@
 package com.onetuks.ihub.service.role;
 
+import com.onetuks.ihub.annotation.RequiresRole;
+import com.onetuks.ihub.config.RoleDataInitializer;
 import com.onetuks.ihub.dto.role.RoleCreateRequest;
 import com.onetuks.ihub.dto.role.RoleGrantRequest;
 import com.onetuks.ihub.dto.role.RoleRevokeRequest;
 import com.onetuks.ihub.dto.role.RoleUpdateRequest;
 import com.onetuks.ihub.entity.role.Role;
 import com.onetuks.ihub.entity.role.UserRole;
+import com.onetuks.ihub.entity.user.User;
 import com.onetuks.ihub.mapper.RoleMapper;
 import com.onetuks.ihub.mapper.UUIDProvider;
 import com.onetuks.ihub.repository.RoleJpaRepository;
@@ -28,8 +31,9 @@ public class RoleService {
   private final UserRoleJpaRepository userRoleRepository;
   private final UserJpaRepository userRepository;
 
+  @RequiresRole(RoleDataInitializer.USER_FULL_ACCESS)
   @Transactional
-  public List<Role> grant(RoleGrantRequest request) {
+  public List<Role> grant(User user, RoleGrantRequest request) {
     List<UserRole> originUserRoles = userRoleRepository.findAllByUserEmail(request.email());
     List<UserRole> grantedUserRoles = request.roleIds().stream()
         .map(roleRepository::findById)
@@ -50,8 +54,9 @@ public class RoleService {
     return allUsersRoles;
   }
 
+  @RequiresRole(RoleDataInitializer.USER_FULL_ACCESS)
   @Transactional
-  public List<Role> revoke(RoleRevokeRequest request) {
+  public List<Role> revoke(User user, RoleRevokeRequest request) {
     List<UserRole> originUserRoles = userRoleRepository.findAllByUserEmail(request.email());
     request.roleIds().stream()
         .map(roleRepository::findById)
@@ -68,32 +73,37 @@ public class RoleService {
         .toList();
   }
 
+  @RequiresRole(RoleDataInitializer.USER_FULL_ACCESS)
   @Transactional
-  public Role create(RoleCreateRequest request) {
+  public Role create(User user, RoleCreateRequest request) {
     Role role = new Role();
     RoleMapper.applyCreate(role, request);
     return roleRepository.save(role);
   }
 
+  @RequiresRole(RoleDataInitializer.USER_FULL_ACCESS)
   @Transactional(readOnly = true)
-  public Role getById(String roleId) {
+  public Role getById(User user, String roleId) {
     return findEntity(roleId);
   }
 
+  @RequiresRole(RoleDataInitializer.USER_FULL_ACCESS)
   @Transactional(readOnly = true)
-  public List<Role> getAll() {
+  public List<Role> getAll(User user) {
     return roleRepository.findAll();
   }
 
+  @RequiresRole(RoleDataInitializer.USER_FULL_ACCESS)
   @Transactional
-  public Role update(String roleId, RoleUpdateRequest request) {
+  public Role update(User user, String roleId, RoleUpdateRequest request) {
     Role role = findEntity(roleId);
     RoleMapper.applyUpdate(role, request);
     return role;
   }
 
+  @RequiresRole(RoleDataInitializer.USER_FULL_ACCESS)
   @Transactional
-  public void delete(String roleId) {
+  public void delete(User user, String roleId) {
     Role role = findEntity(roleId);
     roleRepository.delete(role);
   }

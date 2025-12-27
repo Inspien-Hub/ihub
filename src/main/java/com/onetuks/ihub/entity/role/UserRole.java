@@ -1,6 +1,7 @@
 package com.onetuks.ihub.entity.role;
 
 import com.onetuks.ihub.entity.user.User;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -30,11 +31,11 @@ public class UserRole {
   @Column(name = "user_role_id", nullable = false)
   private String userRoleId;
 
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.REMOVE)
   @JoinColumn(name = "email", referencedColumnName = "email", nullable = false)
   private User user;
 
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.REMOVE)
   @JoinColumn(name = "role_id", referencedColumnName = "role_id", nullable = false)
   private Role role;
 }

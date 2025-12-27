@@ -1,44 +1,33 @@
 package com.onetuks.ihub.service.user;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.onetuks.ihub.IHubApplicationTests;
 import com.onetuks.ihub.TestcontainersConfiguration;
 import com.onetuks.ihub.dto.user.UserCreateRequest;
 import com.onetuks.ihub.dto.user.UserResponse;
 import com.onetuks.ihub.dto.user.UserUpdateRequest;
+import com.onetuks.ihub.entity.user.User;
 import com.onetuks.ihub.entity.user.UserStatus;
 import com.onetuks.ihub.mapper.UserMapper;
-import com.onetuks.ihub.repository.UserJpaRepository;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 
 @SpringBootTest
 @Import(TestcontainersConfiguration.class)
-class UserServiceTest {
-
-  @Autowired
-  private UserService userService;
-
-  @Autowired
-  private UserJpaRepository userJpaRepository;
-
-  @AfterEach
-  void tearDown() {
-    userJpaRepository.deleteAll();
-  }
+class UserServiceTest extends IHubApplicationTests {
 
   @Test
   void createUser_success() {
     UserCreateRequest request = createRequest("user1@example.com", "User One");
 
-    UserResponse response = UserMapper.toResponse(userService.create(request));
+    UserResponse response = UserMapper.toResponse(userService.create(preparedUser, request));
 
     assertNotNull(response.email());
     assertEquals("user1@example.com", response.email());
@@ -50,8 +39,8 @@ class UserServiceTest {
 
   @Test
   void updateUser_success() {
-    UserResponse created = UserMapper.toResponse(userService.create(
-        createRequest("user2@example.com", "User Two")));
+    UserResponse created = UserMapper.toResponse(
+        userService.create(preparedUser, createRequest("user2@example.com", "User Two")));
     UserUpdateRequest updateRequest = new UserUpdateRequest(
         "newPass",
         "User Two Updated",
@@ -62,7 +51,7 @@ class UserServiceTest {
         UserStatus.INACTIVE);
 
     UserResponse updated = UserMapper.toResponse(
-        userService.update(created.email(), updateRequest));
+        userService.update(preparedUser, created.email(), updateRequest));
 
     assertEquals("user2@example.com", updated.email());
     assertEquals("User Two Updated", updated.name());
@@ -75,8 +64,8 @@ class UserServiceTest {
 
   @Test
   void getUsers_returnsAll() {
-    userService.create(createRequest("a@example.com", "A"));
-    userService.create(createRequest("b@example.com", "B"));
+    userService.create(preparedUser, createRequest("a@example.com", "A"));
+    userService.create(preparedUser, createRequest("b@example.com", "B"));
 
     List<UserResponse> responses = userService.getAll().stream().map(UserMapper::toResponse)
         .toList();
@@ -87,12 +76,12 @@ class UserServiceTest {
   @Test
   void deleteUser_success() {
     UserResponse created = UserMapper.toResponse(userService.create(
-        createRequest("user3@example.com", "User Three")));
+        preparedUser, createRequest("user3@example.com", "User Three")));
 
-    userService.delete(created.email());
+    User result = userService.delete(preparedUser, created.email());
 
-    assertEquals(0, userJpaRepository.count());
-    assertThrows(EntityNotFoundException.class, () -> userService.getById(created.email()));
+    assertThat(result.getEmail()).isEqualTo(created.email());
+    assertThat(result.getStatus()).isEqualTo(UserStatus.DELETED);
   }
 
   private UserCreateRequest createRequest(String email, String name) {

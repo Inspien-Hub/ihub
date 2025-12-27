@@ -56,6 +56,17 @@ public class GlobalExceptionHandler {
         request);
   }
 
+  @ExceptionHandler(AccessDeniedException.class)
+  public ResponseEntity<ApiError> handleAccessDenied(
+      AccessDeniedException ex, WebRequest request) {
+    return buildResponse(
+        HttpStatus.FORBIDDEN,
+        "ACCESS_DENIED",
+        ex.getMessage(),
+        Collections.emptyList(),
+        request);
+  }
+
   @ExceptionHandler(HttpMessageNotReadableException.class)
   public ResponseEntity<ApiError> handleHttpMessageNotReadable(
       HttpMessageNotReadableException ex, WebRequest request) {

@@ -16,12 +16,17 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class RoleDataInitializer implements ApplicationRunner {
 
-  private static final Map<String, String> PREPARED_ROLES = Map.of(
-      "USER_FULL_ACCESS", "계정 다건조회/단건조회/생성/수정",
-      "PROJECT_FULL_ACCESS", "프로젝트 단건조회/생성/수정/권한수정 (내 플젝만 가능), 멤버삭제",
-      "SYSTEM_FULL_ACCESS", "시스템 다건조회/생성/수정/삭제(내 플젝만 가능)",
-      "TASK_FULL_ACCESS", "일감 다건조회/단건조회",
-      "POST_FULL_ACCESS", "다건조회/단건조회/생성/수정/삭제"
+  public static final String USER_FULL_ACCESS = "USER_FULL_ACCESS";
+  public static final String PROJECT_PERSONAL_ACCESS = "PROJECT_PERONAL_ACCESS";
+  public static final String SYSTEM_PERSONAL_ACCESS = "SYSTEM_PERSONAL_ACCESS";
+  public static final String TASK_FULL_ACCESS = "TASK_FULL_ACCESS";
+  public static final String POST_PERSONAL_ACCESS = "POST_PERSONAL_ACCESS";
+  public static final Map<String, String> PREPARED_ROLES = Map.of(
+      USER_FULL_ACCESS, "계정 다건조회/단건조회/생성/수정",
+      PROJECT_PERSONAL_ACCESS, "프로젝트 단건조회/생성/수정/권한수정 (내 플젝만 가능), 멤버삭제",
+      SYSTEM_PERSONAL_ACCESS, "시스템 다건조회/생성/수정/삭제(내 플젝만 가능)",
+      TASK_FULL_ACCESS, "일감 다건조회/단건조회",
+      POST_PERSONAL_ACCESS, "다건조회/단건조회/생성/수정/삭제 (내것만)"
   );
 
   private final RoleJpaRepository roleJpaRepository;

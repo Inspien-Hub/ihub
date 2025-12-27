@@ -1,8 +1,11 @@
 package com.onetuks.ihub.service.user;
 
+import com.onetuks.ihub.annotation.RequiresRole;
+import com.onetuks.ihub.config.RoleDataInitializer;
 import com.onetuks.ihub.dto.user.UserCreateRequest;
 import com.onetuks.ihub.dto.user.UserUpdateRequest;
 import com.onetuks.ihub.entity.user.User;
+import com.onetuks.ihub.entity.user.UserStatus;
 import com.onetuks.ihub.mapper.UserMapper;
 import com.onetuks.ihub.repository.UserJpaRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -17,16 +20,18 @@ public class UserService {
 
   private final UserJpaRepository userJpaRepository;
 
+  @RequiresRole(RoleDataInitializer.USER_FULL_ACCESS)
   @Transactional
-  public User create(UserCreateRequest request) {
-    User user = new User();
-    UserMapper.applyCreate(user, request);
-    return userJpaRepository.save(user);
+  public User create(User user, UserCreateRequest request) {
+    User newUser = new User();
+    UserMapper.applyCreate(newUser, request);
+    return userJpaRepository.save(newUser);
   }
 
+  @RequiresRole(RoleDataInitializer.USER_FULL_ACCESS)
   @Transactional(readOnly = true)
-  public User getById(String userId) {
-    return findEntity(userId);
+  public User getById(User user, String email) {
+    return findEntity(email);
   }
 
   @Transactional(readOnly = true)
@@ -34,21 +39,24 @@ public class UserService {
     return userJpaRepository.findAll();
   }
 
+  @RequiresRole(RoleDataInitializer.USER_FULL_ACCESS)
   @Transactional
-  public User update(String userId, UserUpdateRequest request) {
-    User user = findEntity(userId);
-    UserMapper.applyUpdate(user, request);
-    return user;
+  public User update(User user, String email, UserUpdateRequest request) {
+    User target = findEntity(email);
+    UserMapper.applyUpdate(target, request);
+    return target;
   }
 
+  @RequiresRole(RoleDataInitializer.USER_FULL_ACCESS)
   @Transactional
-  public void delete(String userId) {
-    User user = findEntity(userId);
-    userJpaRepository.delete(user);
+  public User delete(User user, String email) {
+    User target = findEntity(email);
+    target.setStatus(UserStatus.DELETED);
+    return target;
   }
 
-  private User findEntity(String userId) {
-    return userJpaRepository.findById(userId)
-        .orElseThrow(() -> new EntityNotFoundException("User not found: " + userId));
+  private User findEntity(String email) {
+    return userJpaRepository.findById(email)
+        .orElseThrow(() -> new EntityNotFoundException("User not found: " + email));
   }
 }
