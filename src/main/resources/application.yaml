@@ -12,9 +12,12 @@ spring:
         open-in-view: false
         show-sql: false
         hibernate:
-            ddl-auto: update
+            ddl-auto: update # none in prod
         database-platform: org.hibernate.dialect.MySQLDialect
 
 springdoc:
     swagger-ui:
         path: /api/docs
+        enabled: true # false in prod
+    api-docs:
+        enabled: true # false in prod
