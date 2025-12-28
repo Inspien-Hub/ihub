@@ -52,7 +52,7 @@ public class File {
   private String mimeType;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "uploaded_by", referencedColumnName = "email")
+  @JoinColumn(name = "uploaded_by", referencedColumnName = "user_id")
   private User uploadedBy;
 
   @Column(name = "uploaded_at")

@@ -21,7 +21,7 @@ public final class InterfaceStatusTransitionMapper {
         transition.getAllowedRole(),
         transition.getStatus(),
         transition.getCreatedAt(),
-        transition.getCreatedBy() != null ? transition.getCreatedBy().getEmail() : null);
+        transition.getCreatedBy() != null ? transition.getCreatedBy().getUserId() : null);
   }
 
   public static void applyCreate(

@@ -77,7 +77,7 @@ public class Interface {
   private String remark;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "created_by", referencedColumnName = "email", nullable = false)
+  @JoinColumn(name = "created_by", referencedColumnName = "user_id", nullable = false)
   private User createdBy;
 
   @Column(name = "created_at")

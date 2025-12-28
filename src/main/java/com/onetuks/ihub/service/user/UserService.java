@@ -29,8 +29,8 @@ public class UserService {
   }
 
   @Transactional(readOnly = true)
-  public User getById(String email) {
-    return findEntity(email);
+  public User getById(String userId) {
+    return findEntity(userId);
   }
 
   @Transactional(readOnly = true)
@@ -39,8 +39,8 @@ public class UserService {
   }
 
   @Transactional
-  public User update(String email, UserUpdateRequest request) {
-    User target = findEntity(email);
+  public User update(String userId, UserUpdateRequest request) {
+    User target = findEntity(userId);
     if (request.password() != null) {
       target.setPassword(passwordEncoder.encode(request.password()));
     }
@@ -49,14 +49,14 @@ public class UserService {
   }
 
   @Transactional
-  public User delete(String email) {
-    User target = findEntity(email);
+  public User delete(String userId) {
+    User target = findEntity(userId);
     target.setStatus(UserStatus.DELETED);
     return target;
   }
 
-  private User findEntity(String email) {
-    return userJpaRepository.findById(email)
-        .orElseThrow(() -> new EntityNotFoundException("User not found: " + email));
+  private User findEntity(String userId) {
+    return userJpaRepository.findById(userId)
+        .orElseThrow(() -> new EntityNotFoundException("User not found: " + userId));
   }
 }

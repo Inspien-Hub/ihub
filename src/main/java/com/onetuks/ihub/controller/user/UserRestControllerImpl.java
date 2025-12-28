@@ -27,13 +27,13 @@ public class UserRestControllerImpl implements UserRestController {
   @Override
   public ResponseEntity<UserResponse> createUser(@Valid @RequestBody UserCreateRequest request) {
     UserResponse response = UserMapper.toResponse(userService.create(request));
-    return ResponseEntity.created(URI.create("/api/users/" + response.email())).body(response);
+    return ResponseEntity.created(URI.create("/api/users/" + response.userId())).body(response);
   }
 
   @RequiresRole(USER_FULL_ACCESS)
   @Override
-  public ResponseEntity<UserResponse> getUser(@PathVariable String email) {
-    return ResponseEntity.ok(UserMapper.toResponse(userService.getById(email)));
+  public ResponseEntity<UserResponse> getUser(@PathVariable(name = "user-id") String userId) {
+    return ResponseEntity.ok(UserMapper.toResponse(userService.getById(userId)));
   }
 
   @Override
@@ -44,14 +44,14 @@ public class UserRestControllerImpl implements UserRestController {
   @RequiresRole(USER_FULL_ACCESS)
   @Override
   public ResponseEntity<UserResponse> updateUser(
-      @PathVariable String email, @Valid @RequestBody UserUpdateRequest request) {
-    return ResponseEntity.ok(UserMapper.toResponse(userService.update(email, request)));
+      @PathVariable(name = "user-id") String userId, @Valid @RequestBody UserUpdateRequest request) {
+    return ResponseEntity.ok(UserMapper.toResponse(userService.update(userId, request)));
   }
 
   @RequiresRole(USER_FULL_ACCESS)
   @Override
-  public ResponseEntity<Void> deleteUser(@PathVariable String email) {
-    userService.delete(email);
+  public ResponseEntity<Void> deleteUser(@PathVariable(name = "user-id") String userId) {
+    userService.delete(userId);
     return ResponseEntity.noContent().build();
   }
 }

@@ -17,7 +17,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name = ProjectMember.TABLE_NAME, uniqueConstraints = {
-    @UniqueConstraint(name = "unq_project_user", columnNames = {"project_id", "email"})})
+    @UniqueConstraint(name = "unq_project_user", columnNames = {"project_id", "user_id"})})
 @Getter
 @Setter
 public class ProjectMember {
@@ -33,7 +33,7 @@ public class ProjectMember {
   private Project project;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "email", referencedColumnName = "email", nullable = false)
+  @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
   private User user;
 
   @Enumerated(value = EnumType.STRING)

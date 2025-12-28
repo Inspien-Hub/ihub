@@ -29,7 +29,7 @@ public class TaskFilterGroup {
   private String groupId;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "email", referencedColumnName = "email", nullable = false)
+  @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
   private User user;
 
   @Column(name = "name", nullable = false)

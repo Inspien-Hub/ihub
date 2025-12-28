@@ -35,7 +35,7 @@ public class FeedItem {
   private String eventType;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "actor_id", referencedColumnName = "email")
+  @JoinColumn(name = "actor_id", referencedColumnName = "user_id")
   private User actor;
 
   @Enumerated(value = EnumType.STRING)

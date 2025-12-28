@@ -44,7 +44,7 @@ public class Attachment {
   private String targetId;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "attached_by", referencedColumnName = "email", nullable = false)
+  @JoinColumn(name = "attached_by", referencedColumnName = "user_id", nullable = false)
   private User attachedBy;
 
   @Column(name = "attached_at")

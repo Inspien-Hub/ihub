@@ -37,7 +37,7 @@ public class Folder {
   private String name;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "created_by", referencedColumnName = "email")
+  @JoinColumn(name = "created_by", referencedColumnName = "user_id")
   private User createdBy;
 
   @Column(name = "created_at")

@@ -33,7 +33,9 @@ public class RoleService {
 
   @Transactional
   public List<Role> grant(RoleGrantRequest request) {
-    List<UserRole> originUserRoles = userRoleRepository.findAllByUserEmail(request.email());
+    User user = userRepository.findByEmail(request.email())
+        .orElseThrow(() -> new EntityNotFoundException("User not found: " + request.email()));
+    List<UserRole> originUserRoles = userRoleRepository.findAllByUser(user);
     List<UserRole> grantedUserRoles = request.roleIds().stream()
         .map(roleRepository::findById)
         .filter(Optional::isPresent)
@@ -43,7 +45,7 @@ public class RoleService {
         .map(role -> userRoleRepository.save(
             new UserRole(
                 UUIDProvider.provideUUID(UserRole.TABLE_NAME),
-                userRepository.findById(request.email()).orElseThrow(EntityNotFoundException::new),
+                user,
                 role)))
         .toList();
 
@@ -55,14 +57,16 @@ public class RoleService {
 
   @Transactional
   public List<Role> revoke(RoleRevokeRequest request) {
-    List<UserRole> originUserRoles = userRoleRepository.findAllByUserEmail(request.email());
+    User user = userRepository.findByEmail(request.email())
+        .orElseThrow(() -> new EntityNotFoundException("User not found: " + request.email()));
+    List<UserRole> originUserRoles = userRoleRepository.findAllByUser(user);
     request.roleIds().stream()
         .map(roleRepository::findById)
         .filter(Optional::isPresent)
         .map(Optional::get)
         .filter(role -> originUserRoles.stream()
             .anyMatch(userRole -> Objects.equals(userRole.getRole(), role)))
-        .forEach(role -> userRoleRepository.deleteByUserEmailAndRole(request.email(), role));
+        .forEach(role -> userRoleRepository.deleteByUserAndRole(user, role));
 
     return originUserRoles.stream()
         .map(UserRole::getRole)

@@ -26,8 +26,8 @@ public final class ConnectionMapper {
         connection.getExtraConfig(),
         connection.getStatus(),
         connection.getDescription(),
-        connection.getCreatedBy() != null ? connection.getCreatedBy().getEmail() : null,
-        connection.getUpdatedBy() != null ? connection.getUpdatedBy().getEmail() : null,
+        connection.getCreatedBy() != null ? connection.getCreatedBy().getUserId() : null,
+        connection.getUpdatedBy() != null ? connection.getUpdatedBy().getUserId() : null,
         connection.getCreatedAt(),
         connection.getUpdatedAt());
   }

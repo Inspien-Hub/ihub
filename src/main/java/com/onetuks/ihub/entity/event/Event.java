@@ -48,7 +48,7 @@ public class Event {
   private Integer remindBeforeMinutes;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "created_by", referencedColumnName = "email")
+  @JoinColumn(name = "created_by", referencedColumnName = "user_id")
   private User createdBy;
 
   @Column(name = "created_at")

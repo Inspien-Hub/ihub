@@ -125,6 +125,7 @@ class ProjectServiceTest {
 
   private User buildUser(String email, String name) {
     User user = new User();
+    user.setUserId(email);
     user.setEmail(email);
     user.setPassword("pass");
     user.setName(name);

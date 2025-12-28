@@ -45,9 +45,11 @@ public final class ServiceTestDataFactory {
   }
 
   public static User createUser(UserJpaRepository userJpaRepository) {
+    String email = UUID.randomUUID().toString().substring(0, 10) + "@naver.com";
     return userJpaRepository.save(
         new User(
-            UUID.randomUUID().toString().substring(0, 10) + "@naver.com",
+            email,
+            email,
             "pass", "나훈아", new String[]{"인스피언", "하이닉스"}[new Random().nextInt(2)],
             "선임", "010-1234-4321", "profile-img.png",
             UserStatus.ACTIVE, LocalDateTime.now(), LocalDateTime.now()));

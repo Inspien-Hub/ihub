@@ -13,6 +13,7 @@ public final class UserMapper {
 
   public static UserResponse toResponse(User user) {
     return new UserResponse(
+        user.getUserId(),
         user.getEmail(),
         user.getName(),
         user.getCompany(),
@@ -26,6 +27,7 @@ public final class UserMapper {
 
   public static void applyCreate(User user, UserCreateRequest request) {
     LocalDateTime now = LocalDateTime.now();
+    user.setUserId(request.email());
     user.setEmail(request.email());
     user.setName(request.name());
     user.setCompany(request.company());

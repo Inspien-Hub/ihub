@@ -18,7 +18,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name = UserRole.TABLE_NAME, uniqueConstraints = {
-    @UniqueConstraint(name = "unq_user_role", columnNames = {"email", "role_id"})})
+    @UniqueConstraint(name = "unq_user_role", columnNames = {"user_id", "role_id"})})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -32,7 +32,7 @@ public class UserRole {
   private String userRoleId;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "email", referencedColumnName = "email", nullable = false)
+  @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
   private User user;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)

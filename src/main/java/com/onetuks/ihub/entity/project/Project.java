@@ -40,11 +40,11 @@ public class Project {
   private LocalDate endDate;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "created_by", referencedColumnName = "email", nullable = false)
+  @JoinColumn(name = "created_by", referencedColumnName = "user_id", nullable = false)
   private User createdBy;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "current_admin_id", referencedColumnName = "email", nullable = false)
+  @JoinColumn(name = "current_admin_id", referencedColumnName = "user_id", nullable = false)
   private User currentAdmin;
 
   @Enumerated(value = EnumType.STRING)

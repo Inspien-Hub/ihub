@@ -40,13 +40,13 @@ public class Mention {
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(
-      name = "mentioned_email",
-      referencedColumnName = "email",
+      name = "mentioned_user_id",
+      referencedColumnName = "user_id",
       nullable = false)
   private User mentionedUser;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "created_by", referencedColumnName = "email", nullable = false)
+  @JoinColumn(name = "created_by", referencedColumnName = "user_id", nullable = false)
   private User createdBy;
 
   @Column(name = "created_at")

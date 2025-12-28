@@ -23,6 +23,9 @@ public class User {
   public static final String TABLE_NAME = "users";
 
   @Id
+  @Column(name = "user_id", nullable = false)
+  private String userId;
+
   @Column(name = "email", unique = true, nullable = false)
   private String email;
 

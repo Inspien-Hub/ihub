@@ -35,7 +35,7 @@ public class InterfaceRevision {
   private Integer versionNo;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "changed_by", referencedColumnName = "email", nullable = false)
+  @JoinColumn(name = "changed_by", referencedColumnName = "user_id", nullable = false)
   private User changedBy;
 
   @Column(name = "changed_at")

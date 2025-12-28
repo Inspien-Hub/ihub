@@ -71,11 +71,11 @@ public class Connection {
   private String description;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "created_by", referencedColumnName = "email", nullable = false)
+  @JoinColumn(name = "created_by", referencedColumnName = "user_id", nullable = false)
   private User createdBy;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "updated_by", referencedColumnName = "email", nullable = false)
+  @JoinColumn(name = "updated_by", referencedColumnName = "user_id", nullable = false)
   private User updatedBy;
 
   @Column(name = "created_at")

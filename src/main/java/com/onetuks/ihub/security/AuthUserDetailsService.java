@@ -19,10 +19,10 @@ public class AuthUserDetailsService implements UserDetailsService {
 
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    User user = userJpaRepository.findById(username)
+    User user = userJpaRepository.findByEmail(username)
         .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-    List<String> roles = userRoleJpaRepository.findAllByUserEmail(username).stream()
+    List<String> roles = userRoleJpaRepository.findAllByUser(user).stream()
         .map(userRole -> userRole.getRole().getRoleName())
         .toList();
 

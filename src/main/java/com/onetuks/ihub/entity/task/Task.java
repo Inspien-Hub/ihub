@@ -56,11 +56,11 @@ public class Task {
   private TaskStatus status;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "assignee_id", referencedColumnName = "email")
+  @JoinColumn(name = "assignee_id", referencedColumnName = "user_id")
   private User assignee;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "requester_id", referencedColumnName = "email")
+  @JoinColumn(name = "requester_id", referencedColumnName = "user_id")
   private User requester;
 
   @Column(name = "start_date")
@@ -77,7 +77,7 @@ public class Task {
   private Integer progress;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "created_by", referencedColumnName = "email")
+  @JoinColumn(name = "created_by", referencedColumnName = "user_id")
   private User createdBy;
 
   @Column(name = "created_at")
