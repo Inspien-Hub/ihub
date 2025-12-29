@@ -6,6 +6,8 @@ import com.onetuks.ihub.entity.interfaces.InterfaceStatus;
 import com.onetuks.ihub.entity.interfaces.InterfaceType;
 import com.onetuks.ihub.entity.interfaces.SyncAsyncType;
 import com.onetuks.ihub.entity.project.Project;
+import com.onetuks.ihub.entity.project.ProjectMember;
+import com.onetuks.ihub.entity.project.ProjectMemberRole;
 import com.onetuks.ihub.entity.project.ProjectStatus;
 import com.onetuks.ihub.entity.role.Role;
 import com.onetuks.ihub.entity.role.UserRole;
@@ -20,6 +22,7 @@ import com.onetuks.ihub.mapper.UUIDProvider;
 import com.onetuks.ihub.repository.InterfaceJpaRepository;
 import com.onetuks.ihub.repository.InterfaceStatusJpaRepository;
 import com.onetuks.ihub.repository.ProjectJpaRepository;
+import com.onetuks.ihub.repository.ProjectMemberJpaRepository;
 import com.onetuks.ihub.repository.RoleJpaRepository;
 import com.onetuks.ihub.repository.SystemJpaRepository;
 import com.onetuks.ihub.repository.TaskJpaRepository;
@@ -74,6 +77,16 @@ public final class ServiceTestDataFactory {
     project.setCreatedAt(LocalDateTime.now());
     project.setUpdatedAt(LocalDateTime.now());
     return projectJpaRepository.save(project);
+  }
+
+  public static ProjectMember createProjectMember(
+      ProjectMemberJpaRepository repository, Project project, User user) {
+    LocalDateTime now = LocalDateTime.now();
+    return repository.save(
+        new ProjectMember(
+            UUIDProvider.provideUUID(ProjectMember.TABLE_NAME),
+            project, user, ProjectMemberRole.PROJECT_OWNER,
+            now, now));
   }
 
   public static com.onetuks.ihub.entity.system.System createSystem(

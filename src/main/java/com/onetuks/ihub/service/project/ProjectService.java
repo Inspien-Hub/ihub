@@ -37,9 +37,8 @@ public class ProjectService {
 
   @Transactional(readOnly = true)
   public Project getById(User currentUser, String projectId) {
-    Project project = findEntity(projectId);
-    checkIsProjectMember(currentUser, project);
-    return project;
+    checkIsProjectMember(currentUser, projectId);
+    return findEntity(projectId);
   }
 
   @Transactional(readOnly = true)
@@ -50,11 +49,12 @@ public class ProjectService {
 
   @Transactional
   public Project update(User currentUser, String projectId, ProjectUpdateRequest request) {
-    Project project = findEntity(projectId);
-    checkIsProjectMember(currentUser, project);
+    checkIsProjectMember(currentUser, projectId);
 
+    Project project = findEntity(projectId);
     ProjectMapper.applyUpdate(project, request);
     if (request.currentAdminId() != null) {
+      checkIsProjectMember(findUser(request.currentAdminId()), projectId);
       project.setCurrentAdmin(findUser(request.currentAdminId()));
     }
     return project;
@@ -62,10 +62,18 @@ public class ProjectService {
 
   @Transactional
   public Project delete(User currentUser, String projectId) {
+    checkIsProjectMember(currentUser, projectId);
+
     Project project = findEntity(projectId);
-    checkIsProjectMember(currentUser, project);
     project.setStatus(ProjectStatus.DELETED);
     return project;
+  }
+
+  private void checkIsProjectMember(User user, String projectId) {
+    boolean isProjectMember = projectMemberRepository.existsByProject_ProjectIdAndUser(projectId, user);
+    if (!isProjectMember) {
+      throw new AccessDeniedException("프로젝트 멤버가 아닙니다.");
+    }
   }
 
   private Project findEntity(String projectId) {
@@ -76,12 +84,5 @@ public class ProjectService {
   private User findUser(String userId) {
     return userRepository.findById(userId)
         .orElseThrow(() -> new EntityNotFoundException("User not found: " + userId));
-  }
-
-  private void checkIsProjectMember(User user, Project project) {
-    boolean isProjectMember = projectMemberRepository.existsByProjectAndUser(project, user);
-    if (!isProjectMember) {
-      throw new AccessDeniedException("프로젝트 멤버가 아닙니다.");
-    }
   }
 }

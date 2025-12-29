@@ -1,7 +1,6 @@
 package com.onetuks.ihub.mapper;
 
 import com.onetuks.ihub.dto.project.ProjectMemberResponse;
-import com.onetuks.ihub.dto.project.ProjectMemberUpdateRequest;
 import com.onetuks.ihub.entity.project.Project;
 import com.onetuks.ihub.entity.project.ProjectMember;
 import com.onetuks.ihub.entity.project.ProjectMemberRole;
@@ -31,14 +30,5 @@ public final class ProjectMemberMapper {
         ProjectMemberRole.PROJECT_OWNER,
         LocalDateTime.now(),
         null);
-  }
-
-  public static void applyUpdate(ProjectMember projectMember, ProjectMemberUpdateRequest request) {
-    if (request.role() != null) {
-      projectMember.setRole(request.role());
-    }
-    if (request.leftAt() != null) {
-      projectMember.setLeftAt(request.leftAt());
-    }
   }
 }
