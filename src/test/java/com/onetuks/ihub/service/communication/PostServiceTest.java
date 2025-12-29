@@ -1,27 +1,31 @@
 package com.onetuks.ihub.service.communication;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.onetuks.ihub.TestcontainersConfiguration;
 import com.onetuks.ihub.dto.communication.PostCreateRequest;
-import com.onetuks.ihub.dto.communication.PostResponse;
 import com.onetuks.ihub.dto.communication.PostUpdateRequest;
+import com.onetuks.ihub.entity.communication.Post;
+import com.onetuks.ihub.entity.communication.PostStatus;
 import com.onetuks.ihub.entity.project.Project;
+import com.onetuks.ihub.entity.project.ProjectMember;
 import com.onetuks.ihub.entity.user.User;
-import com.onetuks.ihub.mapper.PostMapper;
+import com.onetuks.ihub.exception.AccessDeniedException;
+import com.onetuks.ihub.mapper.UUIDProvider;
 import com.onetuks.ihub.repository.PostJpaRepository;
 import com.onetuks.ihub.repository.ProjectJpaRepository;
+import com.onetuks.ihub.repository.ProjectMemberJpaRepository;
 import com.onetuks.ihub.repository.UserJpaRepository;
 import com.onetuks.ihub.service.ServiceTestDataFactory;
-import jakarta.persistence.EntityNotFoundException;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @SpringBootTest
 @Import(TestcontainersConfiguration.class)
@@ -32,12 +36,12 @@ class PostServiceTest {
 
   @Autowired
   private PostJpaRepository postJpaRepository;
-
   @Autowired
   private ProjectJpaRepository projectJpaRepository;
-
   @Autowired
   private UserJpaRepository userJpaRepository;
+  @Autowired
+  private ProjectMemberJpaRepository projectMemberJpaRepository;
 
   private Project project;
   private User author;
@@ -45,62 +49,69 @@ class PostServiceTest {
   @BeforeEach
   void setUp() {
     author = ServiceTestDataFactory.createUser(userJpaRepository);
-    project = ServiceTestDataFactory.createProject(projectJpaRepository, author, author, "PostProj");
-  }
-
-  @AfterEach
-  void tearDown() {
-    postJpaRepository.deleteAll();
-    projectJpaRepository.deleteAll();
-    userJpaRepository.deleteAll();
+    project = ServiceTestDataFactory.createProject(projectJpaRepository, author, author,
+        "PostProj");
+    ServiceTestDataFactory.createProjectMember(projectMemberJpaRepository, project, author);
   }
 
   @Test
   void createPost_success() {
-    PostCreateRequest request = new PostCreateRequest(
-        project.getProjectId(),
-        "Title",
-        "Content",
-        author.getEmail());
+    PostCreateRequest request = buildCreatePostRequest();
 
-    PostResponse response = PostMapper.toResponse(postService.create(request));
+    Post result = postService.create(author, request);
 
-    assertNotNull(response.postId());
-    assertEquals("Title", response.title());
-    assertEquals(project.getProjectId(), response.projectId());
+    assertThat(result.getPostId()).isNotNull();
+    assertThat(result.getTitle()).isEqualToIgnoringCase(request.title());
+    assertThat(result.getCreatedBy().getUserId()).isEqualTo(author.getUserId());
   }
 
   @Test
   void updatePost_success() {
-    PostResponse created = PostMapper.toResponse(postService.create(new PostCreateRequest(
-        project.getProjectId(), "Old", "Old content", author.getEmail())));
-
+    Post created = postService.create(author, buildCreatePostRequest());
     PostUpdateRequest updateRequest = new PostUpdateRequest("New", "New content");
 
-    PostResponse updated = PostMapper.toResponse(postService.update(created.postId(), updateRequest));
+    Post result = postService.update(author, created.getPostId(), updateRequest);
 
-    assertEquals("New", updated.title());
-    assertEquals("New content", updated.content());
+    assertThat(result.getTitle()).isEqualToIgnoringCase(updateRequest.title());
+    assertThat(result.getContent()).isEqualToIgnoringCase(updateRequest.content());
+  }
+
+  @Test
+  void getPostById_exception() {
+    // Given
+    User hacker = ServiceTestDataFactory.createUser(userJpaRepository);
+    Post created = postService.create(author, buildCreatePostRequest());
+
+    // When & Then
+    assertThatThrownBy(() -> postService.getById(hacker, created.getPostId()))
+        .isInstanceOf(AccessDeniedException.class);
   }
 
   @Test
   void getPosts_returnsAll() {
-    postService.create(new PostCreateRequest(
-        project.getProjectId(), "P1", "C1", author.getEmail()));
-    postService.create(new PostCreateRequest(
-        project.getProjectId(), "P2", "C2", author.getEmail()));
+    long expected = postJpaRepository.count();
+    Pageable pageable = PageRequest.of(0, 10);
+    postService.create(author, buildCreatePostRequest());
+    postService.create(author, buildCreatePostRequest());
 
-    assertEquals(2, postService.getAll().size());
+    Page<Post> results = postService.getAll(author, project.getProjectId(), pageable);
+
+    assertThat(results.getTotalElements()).isEqualTo(expected);
   }
 
   @Test
   void deletePost_success() {
-    PostResponse created = PostMapper.toResponse(postService.create(new PostCreateRequest(
-        project.getProjectId(), "P3", "C3", author.getEmail())));
+    Post created = postService.create(author, buildCreatePostRequest());
 
-    postService.delete(created.postId());
+    Post result = postService.delete(author, created.getPostId());
 
-    assertEquals(0, postJpaRepository.count());
-    assertThrows(EntityNotFoundException.class, () -> postService.getById(created.postId()));
+    assertThat(result.getStatus()).isEqualTo(PostStatus.DELETED);
+  }
+
+  private PostCreateRequest buildCreatePostRequest() {
+    return new PostCreateRequest(
+        project.getProjectId(),
+        "Title",
+        "Content");
   }
 }

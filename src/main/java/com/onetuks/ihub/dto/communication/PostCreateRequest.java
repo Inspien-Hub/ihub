@@ -5,8 +5,7 @@ import jakarta.validation.constraints.NotNull;
 public record PostCreateRequest(
     @NotNull String projectId,
     String title,
-    String content,
-    String createdById
+    String content
 ) {
 
 }

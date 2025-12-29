@@ -4,6 +4,9 @@ import com.onetuks.ihub.dto.communication.PostCreateRequest;
 import com.onetuks.ihub.dto.communication.PostResponse;
 import com.onetuks.ihub.dto.communication.PostUpdateRequest;
 import com.onetuks.ihub.entity.communication.Post;
+import com.onetuks.ihub.entity.communication.PostStatus;
+import com.onetuks.ihub.entity.project.Project;
+import com.onetuks.ihub.entity.user.User;
 import java.time.LocalDateTime;
 
 public final class PostMapper {
@@ -22,13 +25,18 @@ public final class PostMapper {
         post.getUpdatedAt());
   }
 
-  public static void applyCreate(Post post, PostCreateRequest request) {
+  public static Post applyCreate(User currentUser, Project project, PostCreateRequest request) {
     LocalDateTime now = LocalDateTime.now();
-    post.setPostId(UUIDProvider.provideUUID(Post.TABLE_NAME));
-    post.setTitle(request.title());
-    post.setContent(request.content());
-    post.setCreatedAt(now);
-    post.setUpdatedAt(now);
+    return new Post(
+        UUIDProvider.provideUUID(Post.TABLE_NAME),
+        project,
+        PostStatus.ACTIVE,
+        request.title(),
+        request.content(),
+        currentUser,
+        now,
+        now
+    );
   }
 
   public static void applyUpdate(Post post, PostUpdateRequest request) {
