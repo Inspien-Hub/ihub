@@ -6,12 +6,9 @@ import com.onetuks.ihub.entity.communication.Post;
 import com.onetuks.ihub.entity.communication.PostStatus;
 import com.onetuks.ihub.entity.project.Project;
 import com.onetuks.ihub.entity.user.User;
-import com.onetuks.ihub.exception.AccessDeniedException;
 import com.onetuks.ihub.mapper.PostMapper;
 import com.onetuks.ihub.repository.PostJpaRepository;
 import com.onetuks.ihub.repository.ProjectJpaRepository;
-import com.onetuks.ihub.repository.ProjectMemberJpaRepository;
-import com.onetuks.ihub.repository.UserJpaRepository;
 import com.onetuks.ihub.service.project.ProjectMemberCheckComponent;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -30,11 +27,9 @@ public class PostService {
 
   @Transactional
   public Post create(User currentUser, PostCreateRequest request) {
-    return postJpaRepository.save(
-        PostMapper.applyCreate(
-            currentUser,
-            findProject(request.projectId()),
-            request));
+    Project project = findProject(request.projectId());
+    projectMemberCheckComponent.checkIsProjectMember(currentUser, project.getProjectId());
+    return postJpaRepository.save(PostMapper.applyCreate(currentUser, project, request));
   }
 
   @Transactional(readOnly = true)

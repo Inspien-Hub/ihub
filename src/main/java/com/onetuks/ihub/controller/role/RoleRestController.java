@@ -29,7 +29,7 @@ public interface RoleRestController {
 
   @Operation(summary = "Grant role to user")
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "201", description = "Role granted"),
+      @ApiResponse(responseCode = "200", description = "Role granted"),
       @ApiResponse(responseCode = "400", description = "Invalid request"),
       @ApiResponse(responseCode = "500", description = "Internal server error")
   })
@@ -38,7 +38,7 @@ public interface RoleRestController {
 
   @Operation(summary = "Revoke role from user")
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "201", description = "Role revoked"),
+      @ApiResponse(responseCode = "200", description = "Role revoked"),
       @ApiResponse(responseCode = "400", description = "Invalid request"),
       @ApiResponse(responseCode = "500", description = "Internal server error")
   })

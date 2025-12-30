@@ -36,10 +36,7 @@ public class EventService {
   public Event create(User currentUser, EventCreateRequest request) {
     projectMemberCheckComponent.checkIsProjectMember(currentUser, request.projectId());
     return eventJpaRepository.save(
-        EventMapper.applyCreate(
-            currentUser,
-            findProject(request.projectId()),
-            request));
+        EventMapper.applyCreate(currentUser, findProject(request.projectId()), request));
   }
 
   @Transactional(readOnly = true)

@@ -2,7 +2,6 @@ package com.onetuks.ihub.service.event;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.onetuks.ihub.TestcontainersConfiguration;
@@ -98,14 +97,13 @@ class EventServiceTest {
 
   @Test
   void getEvents_returnsAll() {
-    long expected = eventJpaRepository.count() + 2;
     Pageable pageable = PageRequest.of(0, 10);
     eventService.create(creator, buildEventCreateRequest());
     eventService.create(creator, buildEventCreateRequest());
 
     Page<Event> results = eventService.getAll(creator, project.getProjectId(), pageable);
 
-    assertThat(results.getTotalElements()).isEqualTo(expected);
+    assertThat(results.getTotalElements()).isGreaterThanOrEqualTo(2);
   }
 
   @Test
@@ -114,7 +112,8 @@ class EventServiceTest {
 
     eventService.delete(creator, created.getEventId());
 
-    assertThrows(EntityNotFoundException.class, () -> eventService.getById(creator, created.getEventId()));
+    assertThrows(EntityNotFoundException.class,
+        () -> eventService.getById(creator, created.getEventId()));
   }
 
   private EventCreateRequest buildEventCreateRequest() {

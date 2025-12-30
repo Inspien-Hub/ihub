@@ -6,7 +6,6 @@ import com.onetuks.ihub.entity.project.Project;
 import com.onetuks.ihub.entity.project.ProjectMember;
 import com.onetuks.ihub.entity.project.ProjectStatus;
 import com.onetuks.ihub.entity.user.User;
-import com.onetuks.ihub.exception.AccessDeniedException;
 import com.onetuks.ihub.mapper.ProjectMapper;
 import com.onetuks.ihub.mapper.ProjectMemberMapper;
 import com.onetuks.ihub.repository.ProjectJpaRepository;
@@ -55,8 +54,9 @@ public class ProjectService {
     Project project = findEntity(projectId);
     ProjectMapper.applyUpdate(project, request);
     if (request.currentAdminId() != null) {
-      projectMemberCheckComponent.checkIsProjectMember(findUser(request.currentAdminId()), projectId);
-      project.setCurrentAdmin(findUser(request.currentAdminId()));
+      User candidateAdmin = findUser(request.currentAdminId());
+      projectMemberCheckComponent.checkIsProjectMember(candidateAdmin, projectId);
+      project.setCurrentAdmin(candidateAdmin);
     }
     return project;
   }

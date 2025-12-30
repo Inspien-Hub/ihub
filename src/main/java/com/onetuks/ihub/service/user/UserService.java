@@ -10,7 +10,6 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,14 +18,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
   private final UserJpaRepository userJpaRepository;
-  private final PasswordEncoder passwordEncoder;
 
   @Transactional
   public User create(UserCreateRequest request) {
-    User newUser = new User();
-    UserMapper.applyCreate(newUser, request);
-    newUser.setPassword(passwordEncoder.encode(request.password()));
-    return userJpaRepository.save(newUser);
+    return userJpaRepository.save(UserMapper.applyCreate(request));
   }
 
   @Transactional(readOnly = true)
@@ -41,12 +36,7 @@ public class UserService {
 
   @Transactional
   public User update(String userId, UserUpdateRequest request) {
-    User target = findEntity(userId);
-    if (request.password() != null) {
-      target.setPassword(passwordEncoder.encode(request.password()));
-    }
-    UserMapper.applyUpdate(target, request);
-    return target;
+    return UserMapper.applyUpdate(findEntity(userId), request);
   }
 
   @Transactional

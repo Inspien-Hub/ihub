@@ -17,19 +17,22 @@ public final class RoleMapper {
     return new RoleResponse(role.getRoleId(), role.getRoleName(), role.getDescription());
   }
 
-  public static void applyCreate(Role role, RoleCreateRequest request) {
-    role.setRoleId(UUIDProvider.provideUUID(Role.TABLE_NAME));
-    role.setRoleName(request.roleName());
-    role.setDescription(request.description());
+  public static Role applyCreate(RoleCreateRequest request) {
+    return new Role(
+        UUIDProvider.provideUUID(Role.TABLE_NAME),
+        request.roleName(),
+        request.description()
+    );
   }
 
-  public static void applyUpdate(Role role, RoleUpdateRequest request) {
+  public static Role applyUpdate(Role role, RoleUpdateRequest request) {
     if (request.roleName() != null) {
       role.setRoleName(request.roleName());
     }
     if (request.description() != null) {
       role.setDescription(request.description());
     }
+    return role;
   }
 
   public static RoleGrantResponse toGrantResponse(String email, List<Role> roles) {

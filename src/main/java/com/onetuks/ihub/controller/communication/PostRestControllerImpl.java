@@ -14,7 +14,6 @@ import jakarta.validation.Valid;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -32,41 +31,51 @@ public class PostRestControllerImpl implements PostRestController {
 
   @RequiresRole({POST_FULL_ACCESS})
   @Override
-  public ResponseEntity<PostResponse> createPost(@Valid @RequestBody PostCreateRequest request) {
+  public ResponseEntity<PostResponse> createPost(
+      @Valid @RequestBody PostCreateRequest request
+  ) {
     Post result = postService.create(currentUserProvider.resolveUser(), request);
     PostResponse response = PostMapper.toResponse(result);
-    return ResponseEntity.created(URI.create("/api/posts/" + response.postId()))
+    return ResponseEntity
+        .created(URI.create("/api/posts/" + response.postId()))
         .body(response);
   }
 
   @RequiresRole({POST_FULL_ACCESS})
   @Override
-  public ResponseEntity<PostResponse> getPost(@PathVariable String postId) {
+  public ResponseEntity<PostResponse> getPost(
+      @PathVariable String postId
+  ) {
     Post result = postService.getById(currentUserProvider.resolveUser(), postId);
-    return ResponseEntity.ok(PostMapper.toResponse(result));
+    PostResponse response = PostMapper.toResponse(result);
+    return ResponseEntity.ok(response);
   }
 
   @RequiresRole({POST_FULL_ACCESS})
   @Override
   public ResponseEntity<Page<PostResponse>> getPosts(
-      @RequestParam String projectId, @PageableDefault Pageable pageable) {
-    Page<Post> results = postService.getAll(
-        currentUserProvider.resolveUser(), projectId,
-        PageRequest.of(pageable.getPageNumber(), pageable.getPageSize()));
-    return ResponseEntity.ok(results.map(PostMapper::toResponse));
+      @RequestParam String projectId, @PageableDefault Pageable pageable
+  ) {
+    Page<Post> results = postService.getAll(currentUserProvider.resolveUser(), projectId, pageable);
+    Page<PostResponse> responses = results.map(PostMapper::toResponse);
+    return ResponseEntity.ok(responses);
   }
 
   @RequiresRole({POST_FULL_ACCESS})
   @Override
   public ResponseEntity<PostResponse> updatePost(
-      @PathVariable String postId, @Valid @RequestBody PostUpdateRequest request) {
+      @PathVariable String postId, @Valid @RequestBody PostUpdateRequest request
+  ) {
     Post result = postService.update(currentUserProvider.resolveUser(), postId, request);
-    return ResponseEntity.ok(PostMapper.toResponse(result));
+    PostResponse response = PostMapper.toResponse(result);
+    return ResponseEntity.ok(response);
   }
 
   @RequiresRole({POST_FULL_ACCESS})
   @Override
-  public ResponseEntity<Void> deletePost(@PathVariable String postId) {
+  public ResponseEntity<Void> deletePost(
+      @PathVariable String postId
+  ) {
     postService.delete(currentUserProvider.resolveUser(), postId);
     return ResponseEntity.noContent().build();
   }

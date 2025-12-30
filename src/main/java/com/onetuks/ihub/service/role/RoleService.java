@@ -75,9 +75,7 @@ public class RoleService {
 
   @Transactional
   public Role create(RoleCreateRequest request) {
-    Role role = new Role();
-    RoleMapper.applyCreate(role, request);
-    return roleRepository.save(role);
+    return roleRepository.save(RoleMapper.applyCreate(request));
   }
 
   @Transactional(readOnly = true)
@@ -92,16 +90,13 @@ public class RoleService {
 
   @Transactional
   public Role update(String roleId, RoleUpdateRequest request) {
-    Role role = findEntity(roleId);
-    RoleMapper.applyUpdate(role, request);
-    return role;
+    return RoleMapper.applyUpdate(findEntity(roleId), request);
   }
 
   @Transactional
   public void delete(String roleId) {
-    Role role = findEntity(roleId);
-    userRoleRepository.deleteAllByRole(role);
-    roleRepository.delete(role);
+    userRoleRepository.deleteAllByRole_RoleId(roleId);
+    roleRepository.deleteById(roleId);
   }
 
   private Role findEntity(String roleId) {

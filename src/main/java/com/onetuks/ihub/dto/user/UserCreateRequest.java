@@ -16,4 +16,16 @@ public record UserCreateRequest(
     @NotNull UserStatus status
 ) {
 
+  public UserCreateRequest applyEncodedPassword(String encodedPassword) {
+    return new  UserCreateRequest(
+        email,
+        encodedPassword,
+        name,
+        company,
+        position,
+        phoneNumber,
+        profileImageUrl,
+        status
+    );
+  }
 }

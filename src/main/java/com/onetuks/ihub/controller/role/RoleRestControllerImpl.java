@@ -10,6 +10,7 @@ import com.onetuks.ihub.dto.role.RoleResponse;
 import com.onetuks.ihub.dto.role.RoleRevokeRequest;
 import com.onetuks.ihub.dto.role.RoleRevokeResponse;
 import com.onetuks.ihub.dto.role.RoleUpdateRequest;
+import com.onetuks.ihub.entity.role.Role;
 import com.onetuks.ihub.mapper.RoleMapper;
 import com.onetuks.ihub.service.role.RoleService;
 import jakarta.validation.Valid;
@@ -30,44 +31,59 @@ public class RoleRestControllerImpl implements RoleRestController {
   @RequiresRole(USER_FULL_ACCESS)
   @Override
   public ResponseEntity<RoleGrantResponse> grantRoleToUser(
-      @Valid @RequestBody RoleGrantRequest request) {
-    RoleGrantResponse response = RoleMapper.toGrantResponse(request.email(),
-        roleService.grant(request));
+      @Valid @RequestBody RoleGrantRequest request
+  ) {
+    List<Role> results = roleService.grant(request);
+    RoleGrantResponse response = RoleMapper.toGrantResponse(request.email(), results);
     return ResponseEntity.ok(response);
   }
 
   @RequiresRole(USER_FULL_ACCESS)
   @Override
   public ResponseEntity<RoleRevokeResponse> revokeRoleFromUser(
-      @Valid @RequestBody RoleRevokeRequest request) {
-    RoleRevokeResponse response = RoleMapper.toRevokeResponse(request.email(),
-        roleService.revoke(request));
+      @Valid @RequestBody RoleRevokeRequest request
+  ) {
+    List<Role> results = roleService.revoke(request);
+    RoleRevokeResponse response = RoleMapper.toRevokeResponse(request.email(), results);
     return ResponseEntity.ok(response);
   }
 
   @RequiresRole(USER_FULL_ACCESS)
   @Override
-  public ResponseEntity<RoleResponse> createRole(@Valid @RequestBody RoleCreateRequest request) {
-    RoleResponse response = RoleMapper.toResponse(roleService.create(request));
-    return ResponseEntity.created(URI.create("/api/roles/" + response.roleId())).body(response);
+  public ResponseEntity<RoleResponse> createRole(
+      @Valid @RequestBody RoleCreateRequest request
+  ) {
+    Role result = roleService.create(request);
+    RoleResponse response = RoleMapper.toResponse(result);
+    return ResponseEntity
+        .created(URI.create("/api/roles/" + response.roleId()))
+        .body(response);
   }
 
   @RequiresRole(USER_FULL_ACCESS)
   @Override
-  public ResponseEntity<RoleResponse> getRole(@PathVariable String roleId) {
-    return ResponseEntity.ok(RoleMapper.toResponse(roleService.getById(roleId)));
+  public ResponseEntity<RoleResponse> getRole(
+      @PathVariable String roleId
+  ) {
+    Role result = roleService.getById(roleId);
+    RoleResponse response = RoleMapper.toResponse(result);
+    return ResponseEntity.ok(response);
   }
 
   @RequiresRole(USER_FULL_ACCESS)
   @Override
   public ResponseEntity<List<RoleResponse>> getRoles() {
-    return ResponseEntity.ok(roleService.getAll().stream().map(RoleMapper::toResponse).toList());
+    List<Role> results = roleService.getAll();
+    List<RoleResponse> responses = results.stream().map(RoleMapper::toResponse).toList();
+    return ResponseEntity.ok(responses);
   }
 
   @RequiresRole(USER_FULL_ACCESS)
   @Override
   public ResponseEntity<RoleResponse> updateRole(
-      @PathVariable String roleId, @Valid @RequestBody RoleUpdateRequest request) {
+      @PathVariable String roleId,
+      @Valid @RequestBody RoleUpdateRequest request
+  ) {
     return ResponseEntity.ok(RoleMapper.toResponse(roleService.update(roleId, request)));
   }
 

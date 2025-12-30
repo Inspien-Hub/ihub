@@ -32,27 +32,32 @@ public class ProjectRestControllerImpl implements ProjectRestController {
   @RequiresRole({PROJECT_FULL_ACCESS})
   @Override
   public ResponseEntity<ProjectResponse> createProject(
-      @Valid @RequestBody ProjectCreateRequest request) {
+      @Valid @RequestBody ProjectCreateRequest request
+  ) {
     Project project = projectService.create(currentUserProvider.resolveUser(), request);
     ProjectResponse response = ProjectMapper.toResponse(project);
-    return ResponseEntity.created(URI.create("/api/projects/" + response.projectId()))
+    return ResponseEntity
+        .created(URI.create("/api/projects/" + response.projectId()))
         .body(response);
   }
 
   @RequiresRole({PROJECT_FULL_ACCESS})
   @Override
-  public ResponseEntity<ProjectResponse> getProject(@PathVariable String projectId) {
-    Project project = projectService.getById(currentUserProvider.resolveUser(), projectId);
-    return ResponseEntity.ok(ProjectMapper.toResponse(project));
+  public ResponseEntity<ProjectResponse> getProject(
+      @PathVariable String projectId
+  ) {
+    Project result = projectService.getById(currentUserProvider.resolveUser(), projectId);
+    ProjectResponse response = ProjectMapper.toResponse(result);
+    return ResponseEntity.ok(response);
   }
 
   @RequiresRole({PROJECT_FULL_ACCESS})
   @Override
-  public ResponseEntity<Page<ProjectResponse>> getProjects(@PageableDefault Pageable pageable) {
-    Page<ProjectResponse> responses = projectService.getAll(
-            currentUserProvider.resolveUser(),
-            PageRequest.of(pageable.getPageNumber(), pageable.getPageSize()))
-        .map(ProjectMapper::toResponse);
+  public ResponseEntity<Page<ProjectResponse>> getProjects(
+      @PageableDefault Pageable pageable
+  ) {
+    Page<Project> results = projectService.getAll(currentUserProvider.resolveUser(), pageable);
+    Page<ProjectResponse> responses = results.map(ProjectMapper::toResponse);
     return ResponseEntity.ok(responses);
   }
 
@@ -60,14 +65,18 @@ public class ProjectRestControllerImpl implements ProjectRestController {
   @Override
   public ResponseEntity<ProjectResponse> updateProject(
       @PathVariable String projectId,
-      @Valid @RequestBody ProjectUpdateRequest request) {
-    Project project = projectService.update(currentUserProvider.resolveUser(), projectId, request);
-    return ResponseEntity.ok(ProjectMapper.toResponse(project));
+      @Valid @RequestBody ProjectUpdateRequest request
+  ) {
+    Project result = projectService.update(currentUserProvider.resolveUser(), projectId, request);
+    ProjectResponse response = ProjectMapper.toResponse(result);
+    return ResponseEntity.ok(response);
   }
 
   @RequiresRole({PROJECT_FULL_ACCESS})
   @Override
-  public ResponseEntity<Void> deleteProject(@PathVariable String projectId) {
+  public ResponseEntity<Void> deleteProject(
+      @PathVariable String projectId
+  ) {
     projectService.delete(currentUserProvider.resolveUser(), projectId);
     return ResponseEntity.noContent().build();
   }

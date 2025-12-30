@@ -25,21 +25,27 @@ public final class UserMapper {
         user.getUpdatedAt());
   }
 
-  public static void applyCreate(User user, UserCreateRequest request) {
+  public static User applyCreate(UserCreateRequest request) {
     LocalDateTime now = LocalDateTime.now();
-    user.setUserId(request.email());
-    user.setEmail(request.email());
-    user.setName(request.name());
-    user.setCompany(request.company());
-    user.setPosition(request.position());
-    user.setPhoneNumber(request.phoneNumber());
-    user.setProfileImageUrl(request.profileImageUrl());
-    user.setStatus(request.status());
-    user.setCreatedAt(now);
-    user.setUpdatedAt(now);
+    return new User(
+        request.email(),
+        request.email(),
+        request.password(),
+        request.name(),
+        request.company(),
+        request.position(),
+        request.phoneNumber(),
+        request.profileImageUrl(),
+        request.status(),
+        now,
+        now
+    );
   }
 
-  public static void applyUpdate(User user, UserUpdateRequest request) {
+  public static User applyUpdate(User user, UserUpdateRequest request) {
+    if (request.password() != null) {
+      user.setPassword(request.password());
+    }
     if (request.name() != null) {
       user.setName(request.name());
     }
@@ -59,5 +65,6 @@ public final class UserMapper {
       user.setStatus(request.status());
     }
     user.setUpdatedAt(LocalDateTime.now());
+    return user;
   }
 }
