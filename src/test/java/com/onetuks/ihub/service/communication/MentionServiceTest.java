@@ -1,28 +1,32 @@
 package com.onetuks.ihub.service.communication;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.onetuks.ihub.TestcontainersConfiguration;
 import com.onetuks.ihub.dto.communication.MentionCreateRequest;
-import com.onetuks.ihub.dto.communication.MentionResponse;
-import com.onetuks.ihub.dto.communication.MentionUpdateRequest;
+import com.onetuks.ihub.entity.communication.Mention;
 import com.onetuks.ihub.entity.communication.TargetType;
 import com.onetuks.ihub.entity.project.Project;
 import com.onetuks.ihub.entity.user.User;
+import com.onetuks.ihub.exception.AccessDeniedException;
 import com.onetuks.ihub.mapper.MentionMapper;
 import com.onetuks.ihub.repository.MentionJpaRepository;
 import com.onetuks.ihub.repository.ProjectJpaRepository;
+import com.onetuks.ihub.repository.ProjectMemberJpaRepository;
 import com.onetuks.ihub.repository.UserJpaRepository;
 import com.onetuks.ihub.service.ServiceTestDataFactory;
-import jakarta.persistence.EntityNotFoundException;
+import java.time.LocalDateTime;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @SpringBootTest
 @Import(TestcontainersConfiguration.class)
@@ -38,75 +42,111 @@ class MentionServiceTest {
   private ProjectJpaRepository projectJpaRepository;
 
   @Autowired
+  private ProjectMemberJpaRepository projectMemberJpaRepository;
+
+  @Autowired
   private UserJpaRepository userJpaRepository;
 
   private Project project;
   private User mentioned;
-  private User creator;
+  private User author;
 
   @BeforeEach
   void setUp() {
-    creator = ServiceTestDataFactory.createUser(userJpaRepository);
+    author = ServiceTestDataFactory.createUser(userJpaRepository);
     mentioned = ServiceTestDataFactory.createUser(userJpaRepository);
-    project = ServiceTestDataFactory.createProject(projectJpaRepository, creator, creator, "MentionProj");
+    project = ServiceTestDataFactory.createProject(projectJpaRepository, author, author, "MentionProj");
+    ServiceTestDataFactory.createProjectMember(projectMemberJpaRepository, project, author);
+    ServiceTestDataFactory.createProjectMember(projectMemberJpaRepository, project, mentioned);
   }
 
   @AfterEach
   void tearDown() {
     mentionJpaRepository.deleteAll();
+    projectMemberJpaRepository.deleteAll();
     projectJpaRepository.deleteAll();
     userJpaRepository.deleteAll();
   }
 
   @Test
-  void createMention_success() {
-    MentionCreateRequest request = new MentionCreateRequest(
+  void getMyMentions_filtersByProjectAndAuthor() {
+    Project otherProject = ServiceTestDataFactory.createProject(projectJpaRepository, author, author, "Other");
+    ServiceTestDataFactory.createProjectMember(projectMemberJpaRepository, otherProject, author);
+    ServiceTestDataFactory.createProjectMember(projectMemberJpaRepository, otherProject, mentioned);
+
+    saveMention(project, TargetType.POST, "1", mentioned, author, LocalDateTime.now().minusDays(1));
+    saveMention(otherProject, TargetType.TASK, "2", mentioned, author, LocalDateTime.now());
+
+    Pageable pageable = PageRequest.of(0, 10);
+    Page<Mention> results = mentionService.getMyMentions(
+        mentioned,
         project.getProjectId(),
-        TargetType.POST,
-        "1L",
-        mentioned.getEmail(),
-        creator.getEmail());
+        List.of(author.getUserId()),
+        List.of(TargetType.POST),
+        null,
+        null,
+        pageable);
 
-    MentionResponse response = MentionMapper.toResponse(mentionService.create(request));
-
-    assertNotNull(response.mentionId());
-    assertEquals(TargetType.POST, response.targetType());
-    assertEquals(mentioned.getEmail(), response.mentionedUserId());
+    assertEquals(1, results.getTotalElements());
+    assertEquals(project.getProjectId(), results.getContent().get(0).getProject().getProjectId());
+    assertEquals(TargetType.POST, results.getContent().get(0).getTargetType());
   }
 
   @Test
-  void updateMention_success() {
-    MentionResponse created = MentionMapper.toResponse(mentionService.create(new MentionCreateRequest(
-        project.getProjectId(), TargetType.POST, "1L", mentioned.getEmail(), creator.getEmail())));
+  void getMyMentions_filtersByDateRange() {
+    LocalDateTime now = LocalDateTime.now();
+    saveMention(project, TargetType.POST, "1", mentioned, author, now.minusDays(2));
+    saveMention(project, TargetType.TASK, "2", mentioned, author, now.minusHours(1));
 
-    MentionUpdateRequest updateRequest =
-        new MentionUpdateRequest(TargetType.TASK, "2L", creator.getEmail(), mentioned.getEmail());
+    Pageable pageable = PageRequest.of(0, 10);
+    Page<Mention> results = mentionService.getMyMentions(
+        mentioned,
+        null,
+        null,
+        null,
+        now.minusDays(1),
+        now,
+        pageable);
 
-    MentionResponse updated = MentionMapper.toResponse(mentionService.update(created.mentionId(), updateRequest));
-
-    assertEquals(TargetType.TASK, updated.targetType());
-    assertEquals("2L", updated.targetId());
-    assertEquals(creator.getEmail(), updated.mentionedUserId());
+    assertEquals(1, results.getTotalElements());
+    assertEquals("2", results.getContent().get(0).getTargetId());
   }
 
   @Test
-  void getMentions_returnsAll() {
-    mentionService.create(new MentionCreateRequest(
-        project.getProjectId(), TargetType.POST, "1L", mentioned.getEmail(), creator.getEmail()));
-    mentionService.create(new MentionCreateRequest(
-        project.getProjectId(), TargetType.TASK, "2L", creator.getEmail(), creator.getEmail()));
+  void getMyMentions_deniesNonMemberWhenProjectFilterExists() {
+    Project forbidden = ServiceTestDataFactory.createProject(projectJpaRepository, author, author, "Forbidden");
+    saveMention(forbidden, TargetType.POST, "1", mentioned, author, LocalDateTime.now());
 
-    assertEquals(2, mentionService.getAll().size());
+    Pageable pageable = PageRequest.of(0, 10);
+    assertThrows(AccessDeniedException.class, () -> mentionService.getMyMentions(
+        mentioned,
+        forbidden.getProjectId(),
+        null,
+        null,
+        null,
+        null,
+        pageable));
   }
 
-  @Test
-  void deleteMention_success() {
-    MentionResponse created = MentionMapper.toResponse(mentionService.create(new MentionCreateRequest(
-        project.getProjectId(), TargetType.POST, "1L", mentioned.getEmail(), creator.getEmail())));
-
-    mentionService.delete(created.mentionId());
-
-    assertEquals(0, mentionJpaRepository.count());
-    assertThrows(EntityNotFoundException.class, () -> mentionService.getById(created.mentionId()));
+  private void saveMention(
+      Project targetProject,
+      TargetType targetType,
+      String targetId,
+      User mentionedUser,
+      User createdBy,
+      LocalDateTime createdAt
+  ) {
+    Mention mention = new Mention();
+    MentionMapper.applyCreate(mention, new MentionCreateRequest(
+        targetProject.getProjectId(),
+        targetType,
+        targetId,
+        mentionedUser.getUserId(),
+        createdBy.getUserId()));
+    mention.setProject(targetProject);
+    mention.setMentionedUser(mentionedUser);
+    mention.setCreatedBy(createdBy);
+    mention.setCreatedAt(createdAt);
+    mentionJpaRepository.save(mention);
   }
 }

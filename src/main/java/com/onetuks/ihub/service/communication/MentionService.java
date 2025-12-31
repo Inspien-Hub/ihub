@@ -1,17 +1,18 @@
 package com.onetuks.ihub.service.communication;
 
-import com.onetuks.ihub.dto.communication.MentionCreateRequest;
-import com.onetuks.ihub.dto.communication.MentionUpdateRequest;
 import com.onetuks.ihub.entity.communication.Mention;
-import com.onetuks.ihub.entity.project.Project;
+import com.onetuks.ihub.entity.communication.TargetType;
 import com.onetuks.ihub.entity.user.User;
-import com.onetuks.ihub.mapper.MentionMapper;
 import com.onetuks.ihub.repository.MentionJpaRepository;
-import com.onetuks.ihub.repository.ProjectJpaRepository;
-import com.onetuks.ihub.repository.UserJpaRepository;
-import jakarta.persistence.EntityNotFoundException;
+import com.onetuks.ihub.service.project.ProjectMemberCheckComponent;
+import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,60 +21,50 @@ import org.springframework.transaction.annotation.Transactional;
 public class MentionService {
 
   private final MentionJpaRepository mentionJpaRepository;
-  private final ProjectJpaRepository projectJpaRepository;
-  private final UserJpaRepository userJpaRepository;
-
-  @Transactional
-  public Mention create(MentionCreateRequest request) {
-    Mention mention = new Mention();
-    MentionMapper.applyCreate(mention, request);
-    mention.setProject(findProject(request.projectId()));
-    mention.setMentionedUser(findUser(request.mentionedUserId()));
-    mention.setCreatedBy(findUser(request.createdById()));
-    return mentionJpaRepository.save(mention);
-  }
+  private final ProjectMemberCheckComponent projectMemberCheckComponent;
 
   @Transactional(readOnly = true)
-  public Mention getById(String mentionId) {
-    return findEntity(mentionId);
-  }
-
-  @Transactional(readOnly = true)
-  public List<Mention> getAll() {
-    return mentionJpaRepository.findAll();
-  }
-
-  @Transactional
-  public Mention update(String mentionId, MentionUpdateRequest request) {
-    Mention mention = findEntity(mentionId);
-    MentionMapper.applyUpdate(mention, request);
-    if (request.mentionedUserId() != null) {
-      mention.setMentionedUser(findUser(request.mentionedUserId()));
+  public Page<Mention> getMyMentions(
+      User currentUser,
+      String projectId,
+      List<String> authorIds,
+      List<TargetType> targetTypes,
+      LocalDateTime from,
+      LocalDateTime to,
+      Pageable pageable
+  ) {
+    if (projectId != null) {
+      projectMemberCheckComponent.checkIsProjectMember(currentUser, projectId);
     }
-    if (request.createdById() != null) {
-      mention.setCreatedBy(findUser(request.createdById()));
+
+    List<Mention> mentions = mentionJpaRepository.findAllByMentionedUser_UserId(
+        currentUser.getUserId());
+
+    List<Mention> filtered = mentions.stream()
+        .filter(mention -> projectId == null
+            || Objects.equals(projectId, mention.getProject().getProjectId()))
+        .filter(mention -> authorIds == null || authorIds.isEmpty()
+            || (mention.getCreatedBy() != null
+            && authorIds.contains(mention.getCreatedBy().getUserId())))
+        .filter(mention -> targetTypes == null || targetTypes.isEmpty()
+            || targetTypes.contains(mention.getTargetType()))
+        .filter(mention -> from == null
+            || (mention.getCreatedAt() != null && !mention.getCreatedAt().isBefore(from)))
+        .filter(mention -> to == null
+            || (mention.getCreatedAt() != null && !mention.getCreatedAt().isAfter(to)))
+        .sorted(Comparator.comparing(Mention::getCreatedAt, Comparator.nullsLast(Comparator.naturalOrder())))
+        .toList();
+
+    List<Mention> pageContent = slice(filtered, pageable);
+    return new PageImpl<>(pageContent, pageable, filtered.size());
+  }
+
+  private List<Mention> slice(List<Mention> mentions, Pageable pageable) {
+    int start = (int) pageable.getOffset();
+    if (start >= mentions.size()) {
+      return List.of();
     }
-    return mention;
-  }
-
-  @Transactional
-  public void delete(String mentionId) {
-    Mention mention = findEntity(mentionId);
-    mentionJpaRepository.delete(mention);
-  }
-
-  private Mention findEntity(String mentionId) {
-    return mentionJpaRepository.findById(mentionId)
-        .orElseThrow(() -> new EntityNotFoundException("Mention not found: " + mentionId));
-  }
-
-  private Project findProject(String projectId) {
-    return projectJpaRepository.findById(projectId)
-        .orElseThrow(() -> new EntityNotFoundException("Project not found: " + projectId));
-  }
-
-  private User findUser(String userId) {
-    return userJpaRepository.findById(userId)
-        .orElseThrow(() -> new EntityNotFoundException("User not found: " + userId));
+    int end = Math.min(start + pageable.getPageSize(), mentions.size());
+    return mentions.subList(start, end);
   }
 }

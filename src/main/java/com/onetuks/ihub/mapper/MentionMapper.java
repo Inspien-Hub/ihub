@@ -2,7 +2,6 @@ package com.onetuks.ihub.mapper;
 
 import com.onetuks.ihub.dto.communication.MentionCreateRequest;
 import com.onetuks.ihub.dto.communication.MentionResponse;
-import com.onetuks.ihub.dto.communication.MentionUpdateRequest;
 import com.onetuks.ihub.entity.communication.Mention;
 import java.time.LocalDateTime;
 
@@ -27,14 +26,5 @@ public final class MentionMapper {
     mention.setTargetType(request.targetType());
     mention.setTargetId(request.targetId());
     mention.setCreatedAt(LocalDateTime.now());
-  }
-
-  public static void applyUpdate(Mention mention, MentionUpdateRequest request) {
-    if (request.targetType() != null) {
-      mention.setTargetType(request.targetType());
-    }
-    if (request.targetId() != null) {
-      mention.setTargetId(request.targetId());
-    }
   }
 }

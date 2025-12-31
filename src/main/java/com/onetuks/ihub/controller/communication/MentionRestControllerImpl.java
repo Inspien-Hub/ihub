@@ -1,53 +1,50 @@
 package com.onetuks.ihub.controller.communication;
 
-import com.onetuks.ihub.dto.communication.MentionCreateRequest;
 import com.onetuks.ihub.dto.communication.MentionResponse;
-import com.onetuks.ihub.dto.communication.MentionUpdateRequest;
+import com.onetuks.ihub.entity.communication.TargetType;
 import com.onetuks.ihub.mapper.MentionMapper;
+import com.onetuks.ihub.security.CurrentUserProvider;
 import com.onetuks.ihub.service.communication.MentionService;
-import jakarta.validation.Valid;
-import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
 public class MentionRestControllerImpl implements MentionRestController {
 
+  private final CurrentUserProvider currentUserProvider;
   private final MentionService mentionService;
 
   @Override
-  public ResponseEntity<MentionResponse> createMention(
-      @Valid @RequestBody MentionCreateRequest request) {
-    MentionResponse response = MentionMapper.toResponse(mentionService.create(request));
-    return ResponseEntity.created(URI.create("/api/mentions/" + response.mentionId()))
-        .body(response);
-  }
-
-  @Override
-  public ResponseEntity<MentionResponse> getMention(@PathVariable String mentionId) {
-    return ResponseEntity.ok(MentionMapper.toResponse(mentionService.getById(mentionId)));
-  }
-
-  @Override
-  public ResponseEntity<List<MentionResponse>> getMentions() {
-    return ResponseEntity.ok(
-        mentionService.getAll().stream().map(MentionMapper::toResponse).toList());
-  }
-
-  @Override
-  public ResponseEntity<MentionResponse> updateMention(
-      @PathVariable String mentionId, @Valid @RequestBody MentionUpdateRequest request) {
-    return ResponseEntity.ok(MentionMapper.toResponse(mentionService.update(mentionId, request)));
-  }
-
-  @Override
-  public ResponseEntity<Void> deleteMention(@PathVariable String mentionId) {
-    mentionService.delete(mentionId);
-    return ResponseEntity.noContent().build();
+  public ResponseEntity<Page<MentionResponse>> getMyMentions(
+      @RequestParam(required = false) String projectId,
+      @RequestParam(required = false) List<String> authorIds,
+      @RequestParam(required = false) List<TargetType> targetTypes,
+      @RequestParam(required = false)
+      @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+      LocalDateTime from,
+      @RequestParam(required = false)
+      @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+      LocalDateTime to,
+      @PageableDefault Pageable pageable
+  ) {
+    Page<MentionResponse> responses = mentionService.getMyMentions(
+            currentUserProvider.resolveUser(),
+            projectId,
+            authorIds,
+            targetTypes,
+            from,
+            to,
+            pageable)
+        .map(MentionMapper::toResponse);
+    return ResponseEntity.ok(responses);
   }
 }

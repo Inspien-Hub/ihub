@@ -56,7 +56,6 @@ class CommentServiceTest {
   @Autowired
   private UserJpaRepository userJpaRepository;
 
-  private Project project;
   private Post post;
   private User author;
   private User mentionedUser;
@@ -65,7 +64,8 @@ class CommentServiceTest {
   void setUp() {
     author = ServiceTestDataFactory.createUser(userJpaRepository);
     mentionedUser = ServiceTestDataFactory.createUser(userJpaRepository);
-    project = ServiceTestDataFactory.createProject(projectJpaRepository, author, author, "CommentProj");
+    Project project =
+        ServiceTestDataFactory.createProject(projectJpaRepository, author, author, "CommentProj");
     ServiceTestDataFactory.createProjectMember(projectMemberJpaRepository, project, author);
     ServiceTestDataFactory.createProjectMember(projectMemberJpaRepository, project, mentionedUser);
     post = postJpaRepository.save(
@@ -100,7 +100,7 @@ class CommentServiceTest {
     assertEquals(TargetType.POST, result.comment().getTargetType());
     assertEquals(1, result.mentions().size());
     assertEquals(mentionedUser.getUserId(),
-        result.mentions().get(0).getMentionedUser().getUserId());
+        result.mentions().getFirst().getMentionedUser().getUserId());
   }
 
   @Test
