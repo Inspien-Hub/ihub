@@ -42,19 +42,14 @@ class ProjectServiceTest {
   private ProjectJpaRepository projectJpaRepository;
 
   @Autowired
-  private ProjectMemberJpaRepository projectMemberJpaRepository;
-
-  @Autowired
   private UserJpaRepository userJpaRepository;
 
   private User creator;
-  private User admin;
   private User hacker;
 
   @BeforeEach
   void setUp() {
     creator = userJpaRepository.save(buildUser("creator@example.com", "Creator"));
-    admin = userJpaRepository.save(buildUser("admin@example.com", "Admin"));
     hacker = userJpaRepository.save(buildUser("hacker@example.com", "Hacker"));
   }
 
@@ -68,7 +63,7 @@ class ProjectServiceTest {
     assertThat(result.getTitle()).isEqualToIgnoringCase(request.title());
     assertThat(result.getStatus()).isEqualTo(ProjectStatus.ACTIVE);
     assertThat(result.getCreatedBy().getUserId()).isEqualTo(creator.getUserId());
-    assertThat(result.getCurrentAdmin().getUserId()).isEqualTo(admin.getUserId());
+    assertThat(result.getUpdatedBy().getUserId()).isEqualTo(creator.getUserId());
   }
 
   @Test
@@ -81,7 +76,6 @@ class ProjectServiceTest {
         "New Desc",
         LocalDate.now().plusDays(1),
         LocalDate.now().plusDays(8),
-        creator.getEmail(), // swap admin
         ProjectStatus.INACTIVE);
 
     // When
@@ -92,7 +86,6 @@ class ProjectServiceTest {
     assertThat(result.getTitle()).isEqualToIgnoringCase(request.title());
     assertThat(result.getStatus()).isEqualTo(request.status());
     assertThat(result.getCreatedBy().getUserId()).isEqualTo(creator.getUserId());
-    assertThat(result.getCurrentAdmin().getUserId()).isEqualTo(request.currentAdminId());
   }
 
   @Test
@@ -142,7 +135,6 @@ class ProjectServiceTest {
         "Desc",
         LocalDate.now(),
         LocalDate.now().plusDays(5),
-        admin.getEmail(),
         ProjectStatus.ACTIVE);
   }
 }

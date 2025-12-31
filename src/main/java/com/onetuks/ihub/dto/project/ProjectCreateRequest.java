@@ -10,7 +10,6 @@ public record ProjectCreateRequest(
     String description,
     LocalDate startDate,
     LocalDate endDate,
-    @NotNull String currentAdminId,
     @NotNull ProjectStatus status
 ) {
 

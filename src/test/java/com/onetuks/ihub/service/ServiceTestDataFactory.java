@@ -67,13 +67,13 @@ public final class ServiceTestDataFactory {
   }
 
   public static Project createProject(
-      ProjectJpaRepository projectJpaRepository, User creator, User admin, String title) {
+      ProjectJpaRepository projectJpaRepository, User creator, User updater, String title) {
     Project project = new Project();
     project.setProjectId(UUIDProvider.provideUUID(Project.TABLE_NAME));
     project.setTitle(title);
     project.setStatus(ProjectStatus.ACTIVE);
     project.setCreatedBy(creator);
-    project.setCurrentAdmin(admin);
+    project.setUpdatedBy(updater);
     project.setCreatedAt(LocalDateTime.now());
     project.setUpdatedAt(LocalDateTime.now());
     return projectJpaRepository.save(project);

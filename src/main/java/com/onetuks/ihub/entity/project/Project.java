@@ -48,8 +48,8 @@ public class Project {
   private User createdBy;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "current_admin_id", referencedColumnName = "user_id", nullable = false)
-  private User currentAdmin;
+  @JoinColumn(name = "updated_by", referencedColumnName = "user_id", nullable = false)
+  private User updatedBy;
 
   @Enumerated(value = EnumType.STRING)
   @Column(name = "status", nullable = false)

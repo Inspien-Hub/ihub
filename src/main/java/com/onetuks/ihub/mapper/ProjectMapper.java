@@ -22,14 +22,14 @@ public final class ProjectMapper {
         project.getStartDate(),
         project.getEndDate(),
         project.getStatus(),
-        project.getCreatedBy() != null ? project.getCreatedBy().getUserId() : null,
-        project.getCurrentAdmin() != null ? project.getCurrentAdmin().getUserId() : null,
+        Objects.requireNonNull(project.getCreatedBy()).getUserId(),
+        Objects.requireNonNull(project.getUpdatedBy()).getUserId(),
         project.getCreatedAt(),
         project.getUpdatedAt());
   }
 
   public static Project applyCreate(
-      ProjectCreateRequest request, User createdBy, User currentAdmin) {
+      ProjectCreateRequest request, User createdBy) {
     LocalDateTime now = LocalDateTime.now();
     return new Project(
         UUIDProvider.provideUUID(Project.TABLE_NAME),
@@ -38,14 +38,14 @@ public final class ProjectMapper {
         request.startDate(),
         request.endDate(),
         createdBy,
-        currentAdmin,
+        createdBy,
         Objects.requireNonNullElse(request.status(), ProjectStatus.ACTIVE),
         now,
         now
     );
   }
 
-  public static void applyUpdate(Project project, ProjectUpdateRequest request) {
+  public static Project applyUpdate(Project project, User currentUser, ProjectUpdateRequest request) {
     if (request.title() != null) {
       project.setTitle(request.title());
     }
@@ -62,6 +62,8 @@ public final class ProjectMapper {
     if (status != null) {
       project.setStatus(status);
     }
+    project.setUpdatedBy(currentUser);
     project.setUpdatedAt(LocalDateTime.now());
+    return project;
   }
 }

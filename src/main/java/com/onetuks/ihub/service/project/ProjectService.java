@@ -25,12 +25,10 @@ public class ProjectService {
   private final ProjectMemberCheckComponent projectMemberCheckComponent;
   private final ProjectJpaRepository projectRepository;
   private final ProjectMemberJpaRepository projectMemberRepository;
-  private final UserJpaRepository userRepository;
 
   @Transactional
   public Project create(User currentUser, ProjectCreateRequest request) {
-    Project project = projectRepository.save(
-        ProjectMapper.applyCreate(request, currentUser, findUser(request.currentAdminId())));
+    Project project = projectRepository.save(ProjectMapper.applyCreate(request, currentUser));
     projectMemberRepository.save(ProjectMemberMapper.applyCreate(project, currentUser));
     return project;
   }
@@ -50,15 +48,7 @@ public class ProjectService {
   @Transactional
   public Project update(User currentUser, String projectId, ProjectUpdateRequest request) {
     projectMemberCheckComponent.checkIsProjectMember(currentUser, projectId);
-
-    Project project = findEntity(projectId);
-    ProjectMapper.applyUpdate(project, request);
-    if (request.currentAdminId() != null) {
-      User candidateAdmin = findUser(request.currentAdminId());
-      projectMemberCheckComponent.checkIsProjectMember(candidateAdmin, projectId);
-      project.setCurrentAdmin(candidateAdmin);
-    }
-    return project;
+    return ProjectMapper.applyUpdate(findEntity(projectId), currentUser, request);
   }
 
   @Transactional
@@ -73,10 +63,5 @@ public class ProjectService {
   private Project findEntity(String projectId) {
     return projectRepository.findById(projectId)
         .orElseThrow(() -> new EntityNotFoundException("Project not found: " + projectId));
-  }
-
-  private User findUser(String userId) {
-    return userRepository.findById(userId)
-        .orElseThrow(() -> new EntityNotFoundException("User not found: " + userId));
   }
 }
