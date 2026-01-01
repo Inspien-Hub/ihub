@@ -15,6 +15,18 @@ spring:
             ddl-auto: update # none in prod
         database-platform: org.hibernate.dialect.MySQLDialect
 
+    mail:
+        host: smtp.gmail.com
+        port: 587
+        username: ${MAIL_USERNAME}
+        password: ${MAIL_PASSWORD}
+        properties:
+          mail:
+              smtp:
+                  auth: true
+                  starttls:
+                      enable: true
+
 security:
     jwt:
         secret: ${JWT_SECRET:dGVzdHRlc3R0ZXN0dGVzdHRlc3R0ZXN0dGVzdHRlc3R0ZXN0dGVzdHRlc3Q=}

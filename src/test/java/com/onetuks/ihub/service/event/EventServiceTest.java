@@ -15,6 +15,7 @@ import com.onetuks.ihub.entity.communication.EventAttendeeStatus;
 import com.onetuks.ihub.entity.project.Project;
 import com.onetuks.ihub.entity.user.User;
 import com.onetuks.ihub.exception.AccessDeniedException;
+import com.onetuks.ihub.repository.AlarmJpaRepository;
 import com.onetuks.ihub.repository.ProjectJpaRepository;
 import com.onetuks.ihub.repository.ProjectMemberJpaRepository;
 import com.onetuks.ihub.repository.UserJpaRepository;
@@ -45,6 +46,8 @@ class EventServiceTest {
   private UserJpaRepository userJpaRepository;
   @Autowired
   private ProjectMemberJpaRepository projectMemberJpaRepository;
+  @Autowired
+  private AlarmJpaRepository alarmJpaRepository;
 
   private Project project;
   private User creator;
@@ -67,6 +70,7 @@ class EventServiceTest {
     assertThat(result.getTitle()).isEqualToIgnoringCase(request.title());
     assertThat(result.getProject().getProjectId()).isEqualToIgnoringCase(request.projectId());
     assertThat(result.getCreatedBy().getUserId()).isEqualToIgnoringCase(creator.getUserId());
+    assertThat(alarmJpaRepository.findByEvent(result)).isPresent();
   }
 
   @Test
@@ -84,6 +88,7 @@ class EventServiceTest {
 
     assertThat(result.getTitle()).isEqualToIgnoringCase(updateRequest.title());
     assertThat(result.getEndDatetime()).isEqualTo(updateRequest.endDatetime());
+    assertThat(alarmJpaRepository.findByEvent(result)).isPresent();
   }
 
   @Test
@@ -116,6 +121,7 @@ class EventServiceTest {
 
     assertThrows(EntityNotFoundException.class,
         () -> eventService.getById(creator, created.getEventId()));
+    assertThat(alarmJpaRepository.findByEvent(created)).isEmpty();
   }
 
   @Test

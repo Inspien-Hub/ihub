@@ -27,6 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class EventService {
 
   private final ProjectMemberCheckComponent projectMemberCheckComponent;
+
+  private final AlarmService alarmService;
+
   private final EventJpaRepository eventJpaRepository;
   private final ProjectJpaRepository projectJpaRepository;
   private final EventAttendeeJpaRepository eventAttendeeJpaRepository;
@@ -35,8 +38,10 @@ public class EventService {
   @Transactional
   public Event create(User currentUser, EventCreateRequest request) {
     projectMemberCheckComponent.checkIsProjectMember(currentUser, request.projectId());
-    return eventJpaRepository.save(
+    Event event = eventJpaRepository.save(
         EventMapper.applyCreate(currentUser, findProject(request.projectId()), request));
+    alarmService.create(event);
+    return event;
   }
 
   @Transactional(readOnly = true)
@@ -59,6 +64,7 @@ public class EventService {
     projectMemberCheckComponent.checkIsProjectMember(currentUser,
         event.getProject().getProjectId());
     EventMapper.applyUpdate(event, request);
+    alarmService.update(event);
     return event;
   }
 
@@ -67,6 +73,7 @@ public class EventService {
     Event event = findEntity(eventId);
     projectMemberCheckComponent.checkIsProjectMember(currentUser,
         event.getProject().getProjectId());
+    alarmService.delete(event);
     eventJpaRepository.delete(event);
   }
 
