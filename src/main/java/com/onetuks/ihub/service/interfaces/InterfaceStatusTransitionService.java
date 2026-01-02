@@ -10,10 +10,11 @@ import com.onetuks.ihub.mapper.InterfaceStatusTransitionMapper;
 import com.onetuks.ihub.repository.InterfaceStatusJpaRepository;
 import com.onetuks.ihub.repository.InterfaceStatusTransitionJpaRepository;
 import com.onetuks.ihub.repository.ProjectJpaRepository;
-import com.onetuks.ihub.repository.UserJpaRepository;
+import com.onetuks.ihub.service.project.ProjectMemberCheckComponent;
 import jakarta.persistence.EntityNotFoundException;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,51 +22,41 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class InterfaceStatusTransitionService {
 
+  private final ProjectMemberCheckComponent projectMemberCheckComponent;
   private final InterfaceStatusTransitionJpaRepository interfaceStatusTransitionJpaRepository;
   private final ProjectJpaRepository projectJpaRepository;
   private final InterfaceStatusJpaRepository interfaceStatusJpaRepository;
-  private final UserJpaRepository userJpaRepository;
 
   @Transactional
   public InterfaceStatusTransition create(
-      InterfaceStatusTransitionCreateRequest request) {
-    InterfaceStatusTransition transition = new InterfaceStatusTransition();
-    InterfaceStatusTransitionMapper.applyCreate(transition, request);
-    transition.setProject(findProject(request.projectId()));
-    transition.setFromStatus(findStatus(request.fromStatusId()));
-    transition.setToStatus(findStatus(request.toStatusId()));
-    transition.setCreatedBy(findUser(request.createdById()));
-    return interfaceStatusTransitionJpaRepository.save(transition);
+      User currentUser, InterfaceStatusTransitionCreateRequest request) {
+    projectMemberCheckComponent.checkIsProjectMember(currentUser, request.projectId());
+    return interfaceStatusTransitionJpaRepository.save(
+        InterfaceStatusTransitionMapper.applyCreate(
+            findProject(request.projectId()),
+            findStatus(request.fromStatusId()),
+            findStatus(request.toStatusId()),
+            currentUser,
+            request)
+    );
   }
 
   @Transactional(readOnly = true)
-  public InterfaceStatusTransition getById(String transitionId) {
-    return findEntity(transitionId);
-  }
-
-  @Transactional(readOnly = true)
-  public List<InterfaceStatusTransition> getAll() {
-    return interfaceStatusTransitionJpaRepository.findAll();
+  public Page<InterfaceStatusTransition> getAll(Pageable pageable) {
+    return interfaceStatusTransitionJpaRepository.findAll(pageable);
   }
 
   @Transactional
   public InterfaceStatusTransition update(
-      String transitionId, InterfaceStatusTransitionUpdateRequest request) {
+      User currentUser, String transitionId, InterfaceStatusTransitionUpdateRequest request) {
     InterfaceStatusTransition transition = findEntity(transitionId);
-    InterfaceStatusTransitionMapper.applyUpdate(transition, request);
-    if (request.fromStatusId() != null) {
-      transition.setFromStatus(findStatus(request.fromStatusId()));
-    }
-    if (request.toStatusId() != null) {
-      transition.setToStatus(findStatus(request.toStatusId()));
-    }
-    return transition;
-  }
-
-  @Transactional
-  public void delete(String transitionId) {
-    InterfaceStatusTransition transition = findEntity(transitionId);
-    interfaceStatusTransitionJpaRepository.delete(transition);
+    projectMemberCheckComponent.checkIsProjectMember(currentUser,
+        transition.getProject().getProjectId());
+    return InterfaceStatusTransitionMapper.applyUpdate(
+        transition,
+        findStatus(request.fromStatusId()),
+        findStatus(request.toStatusId()),
+        request);
   }
 
   private InterfaceStatusTransition findEntity(String transitionId) {
@@ -83,10 +74,5 @@ public class InterfaceStatusTransitionService {
     return interfaceStatusJpaRepository.findById(statusId)
         .orElseThrow(() -> new EntityNotFoundException(
             "Interface status not found: " + statusId));
-  }
-
-  private User findUser(String userId) {
-    return userJpaRepository.findById(userId)
-        .orElseThrow(() -> new EntityNotFoundException("User not found: " + userId));
   }
 }

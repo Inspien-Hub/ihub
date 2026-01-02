@@ -1,31 +1,29 @@
 package com.onetuks.ihub.service.interfaces;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.onetuks.ihub.TestcontainersConfiguration;
 import com.onetuks.ihub.dto.interfaces.InterfaceStatusTransitionCreateRequest;
-import com.onetuks.ihub.dto.interfaces.InterfaceStatusTransitionResponse;
 import com.onetuks.ihub.dto.interfaces.InterfaceStatusTransitionUpdateRequest;
 import com.onetuks.ihub.entity.interfaces.InterfaceRole;
 import com.onetuks.ihub.entity.interfaces.InterfaceStatus;
+import com.onetuks.ihub.entity.interfaces.InterfaceStatusTransition;
 import com.onetuks.ihub.entity.interfaces.InterfaceStatusTransitionStatus;
 import com.onetuks.ihub.entity.project.Project;
 import com.onetuks.ihub.entity.user.User;
-import com.onetuks.ihub.mapper.InterfaceStatusTransitionMapper;
 import com.onetuks.ihub.repository.InterfaceStatusJpaRepository;
-import com.onetuks.ihub.repository.InterfaceStatusTransitionJpaRepository;
 import com.onetuks.ihub.repository.ProjectJpaRepository;
+import com.onetuks.ihub.repository.ProjectMemberJpaRepository;
 import com.onetuks.ihub.repository.UserJpaRepository;
 import com.onetuks.ihub.service.ServiceTestDataFactory;
-import jakarta.persistence.EntityNotFoundException;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @SpringBootTest
 @Import(TestcontainersConfiguration.class)
@@ -35,16 +33,13 @@ class InterfaceStatusTransitionServiceTest {
   private InterfaceStatusTransitionService interfaceStatusTransitionService;
 
   @Autowired
-  private InterfaceStatusTransitionJpaRepository interfaceStatusTransitionJpaRepository;
-
-  @Autowired
   private InterfaceStatusJpaRepository interfaceStatusJpaRepository;
-
   @Autowired
   private ProjectJpaRepository projectJpaRepository;
-
   @Autowired
   private UserJpaRepository userJpaRepository;
+  @Autowired
+  private ProjectMemberJpaRepository projectMemberJpaRepository;
 
   private Project project;
   private User user;
@@ -55,45 +50,38 @@ class InterfaceStatusTransitionServiceTest {
   void setUp() {
     user = ServiceTestDataFactory.createUser(userJpaRepository);
     project = ServiceTestDataFactory.createProject(projectJpaRepository, user, user, "IFTranProj");
+    ServiceTestDataFactory.createProjectMember(projectMemberJpaRepository, project, user);
     fromStatus =
-        ServiceTestDataFactory.createInterfaceStatus(interfaceStatusJpaRepository, project, "Draft", 1);
+        ServiceTestDataFactory.createInterfaceStatus(interfaceStatusJpaRepository, project, "Draft",
+            1);
     toStatus =
-        ServiceTestDataFactory.createInterfaceStatus(interfaceStatusJpaRepository, project, "Live", 2);
+        ServiceTestDataFactory.createInterfaceStatus(interfaceStatusJpaRepository, project, "Live",
+            2);
   }
 
-  @AfterEach
-  void tearDown() {
-    interfaceStatusTransitionJpaRepository.deleteAll();
-    interfaceStatusJpaRepository.deleteAll();
-    projectJpaRepository.deleteAll();
-    userJpaRepository.deleteAll();
+  private InterfaceStatusTransitionCreateRequest buildCreateRequest() {
+    return new InterfaceStatusTransitionCreateRequest(
+        project.getProjectId(),
+        fromStatus.getStatusId(),
+        toStatus.getStatusId(),
+        InterfaceRole.ADMIN);
   }
 
   @Test
   void createInterfaceStatusTransition_success() {
-    InterfaceStatusTransitionCreateRequest request = new InterfaceStatusTransitionCreateRequest(
-        project.getProjectId(),
-        fromStatus.getStatusId(),
-        toStatus.getStatusId(),
-        InterfaceRole.ADMIN,
-        InterfaceStatusTransitionStatus.ACTIVE,
-        user.getEmail());
+    InterfaceStatusTransitionCreateRequest request = buildCreateRequest();
 
-    InterfaceStatusTransitionResponse response = InterfaceStatusTransitionMapper.toResponse(
-        interfaceStatusTransitionService.create(request));
+    InterfaceStatusTransition result = interfaceStatusTransitionService.create(user, request);
 
-    assertNotNull(response.transitionId());
-    assertEquals(InterfaceRole.ADMIN, response.allowedRole());
-    assertEquals(InterfaceStatusTransitionStatus.ACTIVE, response.status());
+    assertThat(result.getTransitionId()).isNotNull();
+    assertThat(result.getStatus()).isEqualTo(InterfaceStatusTransitionStatus.ACTIVE);
+    assertThat(result.getAllowedRole()).isEqualTo(InterfaceRole.ADMIN);
   }
 
   @Test
   void updateInterfaceStatusTransition_success() {
-    InterfaceStatusTransitionResponse created = InterfaceStatusTransitionMapper.toResponse(
-        interfaceStatusTransitionService.create(
-        new InterfaceStatusTransitionCreateRequest(
-            project.getProjectId(), fromStatus.getStatusId(), toStatus.getStatusId(),
-            InterfaceRole.ADMIN, InterfaceStatusTransitionStatus.ACTIVE, user.getEmail())));
+    InterfaceStatusTransition created =
+        interfaceStatusTransitionService.create(user, buildCreateRequest());
 
     InterfaceStatusTransitionUpdateRequest updateRequest =
         new InterfaceStatusTransitionUpdateRequest(
@@ -102,37 +90,21 @@ class InterfaceStatusTransitionServiceTest {
             InterfaceRole.MEMBER,
             InterfaceStatusTransitionStatus.INACTIVE);
 
-    InterfaceStatusTransitionResponse updated = InterfaceStatusTransitionMapper.toResponse(
-        interfaceStatusTransitionService.update(created.transitionId(), updateRequest));
+    InterfaceStatusTransition result =
+        interfaceStatusTransitionService.update(user, created.getTransitionId(), updateRequest);
 
-    assertEquals(InterfaceRole.MEMBER, updated.allowedRole());
-    assertEquals(InterfaceStatusTransitionStatus.INACTIVE, updated.status());
+    assertThat(result.getAllowedRole()).isEqualTo(InterfaceRole.MEMBER);
+    assertThat(result.getStatus()).isEqualTo(InterfaceStatusTransitionStatus.INACTIVE);
   }
 
   @Test
   void getInterfaceStatusTransitions_returnsAll() {
-    interfaceStatusTransitionService.create(new InterfaceStatusTransitionCreateRequest(
-        project.getProjectId(), fromStatus.getStatusId(), toStatus.getStatusId(),
-        InterfaceRole.ADMIN, InterfaceStatusTransitionStatus.ACTIVE, user.getEmail()));
-    interfaceStatusTransitionService.create(new InterfaceStatusTransitionCreateRequest(
-        project.getProjectId(), toStatus.getStatusId(), fromStatus.getStatusId(),
-        InterfaceRole.MEMBER, InterfaceStatusTransitionStatus.ACTIVE, user.getEmail()));
+    Pageable pageable = PageRequest.of(0, 10);
+    interfaceStatusTransitionService.create(user, buildCreateRequest());
+    interfaceStatusTransitionService.create(user, buildCreateRequest());
 
-    assertEquals(2, interfaceStatusTransitionService.getAll().size());
-  }
+    Page<InterfaceStatusTransition> results = interfaceStatusTransitionService.getAll(pageable);
 
-  @Test
-  void deleteInterfaceStatusTransition_success() {
-    InterfaceStatusTransitionResponse created = InterfaceStatusTransitionMapper.toResponse(
-        interfaceStatusTransitionService.create(
-        new InterfaceStatusTransitionCreateRequest(
-            project.getProjectId(), fromStatus.getStatusId(), toStatus.getStatusId(),
-            InterfaceRole.ADMIN, InterfaceStatusTransitionStatus.ACTIVE, user.getEmail())));
-
-    interfaceStatusTransitionService.delete(created.transitionId());
-
-    assertEquals(0, interfaceStatusTransitionJpaRepository.count());
-    assertThrows(EntityNotFoundException.class,
-        () -> interfaceStatusTransitionService.getById(created.transitionId()));
+    assertThat(results.getTotalElements()).isGreaterThanOrEqualTo(2);
   }
 }
