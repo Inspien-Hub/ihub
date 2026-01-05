@@ -264,11 +264,11 @@ Ref: event_attendees.user_id - users.user_id
 Table feed_items {
 feed_id varchar2 [pk]
 project_id varchar2 [not null]
-event_type varchar(100)
+event_type varchar(100) // CREATE, UPDATE, DELETE
 actor_id varchar(255)
-target_type varchar(50)
+target_type varchar(50) // interface, task, event, post, notice, faq, system, connection
 target_id varchar2
-summary text
+summary text // 위 예시 문구 중 이름 빼고
 created_at timestamptz
 }
 
