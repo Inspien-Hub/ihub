@@ -124,9 +124,9 @@
 
 ## Event Attendee
 
-- [ ] **PUT** `/api/events/{eventId}/attendees`
-- [ ] **POST** `/api/events/{eventId}/attendees`
-- [ ] **PATCH** `/api/event-attendees/{eventAttendeeId}`
+- [x] **PUT** `/api/events/{eventId}/attendees`
+- [x] **POST** `/api/events/{eventId}/attendees`
+- [x] **PATCH** `/api/event-attendees/{eventAttendeeId}`
 
 ## Feed
 

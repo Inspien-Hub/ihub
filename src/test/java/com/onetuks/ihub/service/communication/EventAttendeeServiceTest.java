@@ -3,8 +3,9 @@ package com.onetuks.ihub.service.communication;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.onetuks.ihub.TestcontainersConfiguration;
-import com.onetuks.ihub.dto.communication.EventAttendeeRequest;
-import com.onetuks.ihub.dto.communication.EventAttendeeRequest.EventAttendeeRequests;
+import com.onetuks.ihub.dto.communication.EventAttendeeCreateRequest;
+import com.onetuks.ihub.dto.communication.EventAttendeeCreateRequest.EventAttendeeCreateRequests;
+import com.onetuks.ihub.dto.communication.EventAttendeeUpdateRequest;
 import com.onetuks.ihub.dto.communication.EventCreateRequest;
 import com.onetuks.ihub.entity.communication.Event;
 import com.onetuks.ihub.entity.communication.EventAttendee;
@@ -57,16 +58,8 @@ class EventAttendeeServiceTest {
   void manageAttendees_success() {
     // Given
     Event created = eventService.create(creator, project.getProjectId(), buildEventCreateRequest());
-    EventAttendeeRequests requests = new EventAttendeeRequests(List.of(
-        new EventAttendeeRequest(
-            created.getEventId(),
-            ServiceTestDataFactory.createUser(userJpaRepository).getUserId(),
-            true, EventAttendeeStatus.ACCEPTED),
-        new EventAttendeeRequest(
-            created.getEventId(),
-            ServiceTestDataFactory.createUser(userJpaRepository).getUserId(),
-            true, EventAttendeeStatus.ACCEPTED)
-    ));
+    EventAttendeeCreateRequests requests = new EventAttendeeCreateRequests(
+        List.of(buildCreateRequest(created), buildCreateRequest(created)));
 
     // When
     List<EventAttendee> results =
@@ -81,16 +74,8 @@ class EventAttendeeServiceTest {
     // Given
     Pageable pageable = PageRequest.of(0, 10);
     Event created = eventService.create(creator, project.getProjectId(), buildEventCreateRequest());
-    EventAttendeeRequests requests = new EventAttendeeRequests(List.of(
-        new EventAttendeeRequest(
-            created.getEventId(),
-            ServiceTestDataFactory.createUser(userJpaRepository).getUserId(),
-            true, EventAttendeeStatus.ACCEPTED),
-        new EventAttendeeRequest(
-            created.getEventId(),
-            ServiceTestDataFactory.createUser(userJpaRepository).getUserId(),
-            true, EventAttendeeStatus.ACCEPTED)
-    ));
+    EventAttendeeCreateRequests requests = new EventAttendeeCreateRequests(
+        List.of(buildCreateRequest(created), buildCreateRequest(created)));
     eventAttendeeService.manageAttendees(creator, created.getEventId(), requests);
 
     // When
@@ -101,6 +86,38 @@ class EventAttendeeServiceTest {
     assertThat(results.getTotalElements()).isEqualTo(2);
   }
 
+  @Test
+  void addAttendee_success() {
+    // Given
+    Event event = eventService.create(creator, project.getProjectId(), buildEventCreateRequest());
+    EventAttendeeCreateRequest created = buildCreateRequest(event);
+
+    // When
+    EventAttendee result = eventAttendeeService.addAttendee(creator, event.getEventId(), created);
+
+    // Then
+    assertThat(result.getEventAttendeeId()).isNotNull();
+    assertThat(result.getAttendStatus()).isEqualTo(created.attendStatus());
+  }
+
+  @Test
+  void updateAttendee_success() {
+    // Given
+    Event event = eventService.create(creator, project.getProjectId(), buildEventCreateRequest());
+    EventAttendee created =
+        eventAttendeeService.addAttendee(creator, event.getEventId(), buildCreateRequest(event));
+    EventAttendeeUpdateRequest request =
+        new EventAttendeeUpdateRequest(null, EventAttendeeStatus.ABSENT);
+
+    // When
+    EventAttendee result =
+        eventAttendeeService.updateAttendee(creator, created.getEventAttendeeId(), request);
+
+    // Then
+    assertThat(result.getIsMandatory()).isEqualTo(created.getIsMandatory());
+    assertThat(result.getAttendStatus()).isEqualTo(request.attendStatus());
+  }
+
   private EventCreateRequest buildEventCreateRequest() {
     return new EventCreateRequest(
         "Kickoff",
@@ -109,5 +126,12 @@ class EventAttendeeServiceTest {
         "Room1",
         "Content",
         30);
+  }
+
+  private EventAttendeeCreateRequest buildCreateRequest(Event event) {
+    return new EventAttendeeCreateRequest(
+        event.getEventId(),
+        ServiceTestDataFactory.createUser(userJpaRepository).getUserId(),
+        true, EventAttendeeStatus.ACCEPTED);
   }
 }
