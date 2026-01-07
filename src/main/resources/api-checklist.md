@@ -38,10 +38,10 @@
 
 ## Project Member
 
-- [ ] **GET** `/api/projects/{projectId}/members`  _(exclude status=DELETED)_
-- [ ] **POST** `/api/projects/{projectId}/members`  _(default role=VIEWER)_
-- [ ] **PATCH** `/api/projects/{projectId}/members/{memberId}`
-- [ ] **DELETE** `/api/projects/{projectId}/members/{memberId}`
+- [x] **GET** `/api/projects/{projectId}/members`  _(exclude status=DELETED)_
+- [x] **POST** `/api/projects/{projectId}/members`  _(default role=VIEWER)_
+- [x] **PATCH** `/api/projects/{projectId}/members/{memberId}`
+- [x] **DELETE** `/api/projects/{projectId}/members/{memberId}`
 
 ## Interface
 

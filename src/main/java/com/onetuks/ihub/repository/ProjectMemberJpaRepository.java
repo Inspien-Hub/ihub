@@ -2,6 +2,7 @@ package com.onetuks.ihub.repository;
 
 import com.onetuks.ihub.entity.project.ProjectMember;
 import com.onetuks.ihub.entity.user.User;
+import com.onetuks.ihub.entity.user.UserStatus;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -15,6 +16,9 @@ public interface ProjectMemberJpaRepository extends JpaRepository<ProjectMember,
   Page<ProjectMember> findAllByUser(User user, Pageable pageable);
 
   List<ProjectMember> user(User user);
+
+  Page<ProjectMember> findAllByProject_ProjectIdAndUser_StatusNot(
+      String projectId, UserStatus status, Pageable pageable);
 
   Optional<ProjectMember> findByProject_ProjectIdAndUser_UserId(String projectId, String userId);
 }

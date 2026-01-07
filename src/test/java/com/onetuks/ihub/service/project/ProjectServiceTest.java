@@ -12,7 +12,9 @@ import com.onetuks.ihub.entity.project.ProjectStatus;
 import com.onetuks.ihub.entity.user.User;
 import com.onetuks.ihub.entity.user.UserStatus;
 import com.onetuks.ihub.exception.AccessDeniedException;
+import com.onetuks.ihub.repository.ProjectMemberJpaRepository;
 import com.onetuks.ihub.repository.UserJpaRepository;
+import com.onetuks.ihub.service.ServiceTestDataFactory;
 import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,6 +34,8 @@ class ProjectServiceTest {
 
   @Autowired
   private UserJpaRepository userJpaRepository;
+  @Autowired
+  private ProjectMemberJpaRepository projectMemberJpaRepository;
 
   private User creator;
   private User hacker;
@@ -59,6 +63,7 @@ class ProjectServiceTest {
   void updateProject_success() {
     // Given
     Project created = projectService.create(creator, createRequest("Project update"));
+    ServiceTestDataFactory.createProjectMember(projectMemberJpaRepository, created, creator);
 
     ProjectUpdateRequest request = new ProjectUpdateRequest(
         "Project B Updated",
@@ -101,6 +106,7 @@ class ProjectServiceTest {
   @Test
   void deleteProject_success() {
     Project created = projectService.create(creator, createRequest("Project Delete"));
+    ServiceTestDataFactory.createProjectMember(projectMemberJpaRepository, created, creator);
 
     Project result = projectService.delete(creator, created.getProjectId());
 

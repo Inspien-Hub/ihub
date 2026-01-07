@@ -13,6 +13,7 @@ public record ProjectMemberResponse(
     String userId,
     UserStatus userStatus,
     String userName,
+    String userEmail,
     ProjectMemberRole role,
     LocalDateTime joinedAt,
     LocalDateTime leftAt
