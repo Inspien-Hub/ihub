@@ -152,15 +152,15 @@
 
 ## System Owner
 
-- [ ] **GET** `/api/projects/{projectId}/system-owners`
-- [ ] **POST** `/api/projects/{projectId}/system-owners`
-- [ ] **DELETE** `/api/system-owners/{systemOwnerId}`
+- [x] **GET** `/api/projects/{projectId}/system-owners`
+- [x] **POST** `/api/projects/{projectId}/system-owners`
+- [x] **DELETE** `/api/system-owners/{systemOwnerId}`
 
 ## Connection
 
-- [ ] **GET** `/api/systems/{systemId}/connections`  _(exclude status=DELETED)_
-- [ ] **POST** `/api/systems/{systemId}/connections`
-- [ ] **PATCH** `/api/connections/{connectionId}`
+- [x] **GET** `/api/systems/{systemId}/connections`  _(exclude status=DELETED)_
+- [x] **POST** `/api/systems/{systemId}/connections`
+- [x] **PATCH** `/api/connections/{connectionId}`
 
 ## File
 
