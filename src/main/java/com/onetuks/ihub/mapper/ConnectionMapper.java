@@ -4,6 +4,9 @@ import com.onetuks.ihub.dto.system.ConnectionCreateRequest;
 import com.onetuks.ihub.dto.system.ConnectionResponse;
 import com.onetuks.ihub.dto.system.ConnectionUpdateRequest;
 import com.onetuks.ihub.entity.system.Connection;
+import com.onetuks.ihub.entity.system.ConnectionStatus;
+import com.onetuks.ihub.entity.system.System;
+import com.onetuks.ihub.entity.user.User;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -13,7 +16,7 @@ public final class ConnectionMapper {
   }
 
   public static ConnectionResponse toResponse(Connection connection) {
-    var project = Objects.requireNonNull(connection.getProject());
+    var project = Objects.requireNonNull(connection.getSystem().getProject());
     var system = Objects.requireNonNull(connection.getSystem());
     var createdBy = Objects.requireNonNull(connection.getCreatedBy());
     var updatedBy = Objects.requireNonNull(connection.getUpdatedBy());
@@ -43,24 +46,31 @@ public final class ConnectionMapper {
         connection.getUpdatedAt());
   }
 
-  public static void applyCreate(Connection connection, ConnectionCreateRequest request) {
+  public static Connection applyCreate(
+      System system, User currentUser, ConnectionCreateRequest request) {
     LocalDateTime now = LocalDateTime.now();
-    connection.setConnectionId(UUIDProvider.provideUUID(Connection.TABLE_NAME));
-    connection.setName(request.name());
-    connection.setProtocol(request.protocol());
-    connection.setHost(request.host());
-    connection.setPort(request.port());
-    connection.setPath(request.path());
-    connection.setUsername(request.username());
-    connection.setAuthType(request.authType());
-    connection.setExtraConfig(request.extraConfig());
-    connection.setStatus(request.status());
-    connection.setDescription(request.description());
-    connection.setCreatedAt(now);
-    connection.setUpdatedAt(now);
+    return new Connection(
+        UUIDProvider.provideUUID(Connection.TABLE_NAME),
+        system,
+        request.name(),
+        request.protocol(),
+        request.host(),
+        request.port(),
+        request.path(),
+        request.username(),
+        request.authType(),
+        request.extraConfig(),
+        ConnectionStatus.INACTIVE,
+        request.description(),
+        currentUser,
+        currentUser,
+        now,
+        now
+    );
   }
 
-  public static void applyUpdate(Connection connection, ConnectionUpdateRequest request) {
+  public static Connection applyUpdate(
+      Connection connection, User currentUser, ConnectionUpdateRequest request) {
     if (request.name() != null) {
       connection.setName(request.name());
     }
@@ -92,5 +102,7 @@ public final class ConnectionMapper {
       connection.setDescription(request.description());
     }
     connection.setUpdatedAt(LocalDateTime.now());
+    connection.setUpdatedBy(currentUser);
+    return connection;
   }
 }

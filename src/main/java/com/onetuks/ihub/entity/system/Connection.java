@@ -1,6 +1,5 @@
 package com.onetuks.ihub.entity.system;
 
-import com.onetuks.ihub.entity.project.Project;
 import com.onetuks.ihub.entity.user.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,7 +11,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -21,6 +22,8 @@ import org.hibernate.type.SqlTypes;
 @Table(name = Connection.TABLE_NAME)
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Connection {
 
   public static final String TABLE_NAME = "connections";
@@ -28,10 +31,6 @@ public class Connection {
   @Id
   @Column(name = "connection_id", nullable = false)
   private String connectionId;
-
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "project_id", referencedColumnName = "project_id", nullable = false)
-  private Project project;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "system_id", referencedColumnName = "system_id", nullable = false)
@@ -54,7 +53,7 @@ public class Connection {
   private String path;
 
   @Column(name = "username")
-  private String username;
+  private String username; // 계정
 
   @Column(name = "auth_type")
   private String authType;

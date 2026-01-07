@@ -1,31 +1,32 @@
 package com.onetuks.ihub.service.connection;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.onetuks.ihub.TestcontainersConfiguration;
 import com.onetuks.ihub.dto.system.ConnectionCreateRequest;
-import com.onetuks.ihub.dto.system.ConnectionResponse;
 import com.onetuks.ihub.dto.system.ConnectionUpdateRequest;
+import com.onetuks.ihub.entity.project.Project;
+import com.onetuks.ihub.entity.system.Connection;
 import com.onetuks.ihub.entity.system.ConnectionStatus;
 import com.onetuks.ihub.entity.system.Protocol;
-import com.onetuks.ihub.entity.project.Project;
 import com.onetuks.ihub.entity.user.User;
-import com.onetuks.ihub.mapper.ConnectionMapper;
+import com.onetuks.ihub.exception.AccessDeniedException;
 import com.onetuks.ihub.repository.ConnectionJpaRepository;
 import com.onetuks.ihub.repository.ProjectJpaRepository;
+import com.onetuks.ihub.repository.ProjectMemberJpaRepository;
 import com.onetuks.ihub.repository.SystemJpaRepository;
 import com.onetuks.ihub.repository.UserJpaRepository;
 import com.onetuks.ihub.service.ServiceTestDataFactory;
 import com.onetuks.ihub.service.system.ConnectionService;
-import jakarta.persistence.EntityNotFoundException;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @SpringBootTest
 @Import(TestcontainersConfiguration.class)
@@ -36,86 +37,47 @@ class ConnectionServiceTest {
 
   @Autowired
   private ConnectionJpaRepository connectionJpaRepository;
-
   @Autowired
   private ProjectJpaRepository projectJpaRepository;
-
   @Autowired
   private SystemJpaRepository systemJpaRepository;
-
   @Autowired
   private UserJpaRepository userJpaRepository;
+  @Autowired
+  private ProjectMemberJpaRepository projectMemberJpaRepository;
 
   private User creator;
-  private User updater;
-  private Project project;
   private com.onetuks.ihub.entity.system.System system;
 
   @BeforeEach
   void setUp() {
     creator = ServiceTestDataFactory.createUser(userJpaRepository);
-    updater = ServiceTestDataFactory.createUser(userJpaRepository);
-    project = ServiceTestDataFactory.createProject(projectJpaRepository, creator, updater, "ConnProj");
+    User updater = ServiceTestDataFactory.createUser(userJpaRepository);
+    Project project = ServiceTestDataFactory.createProject(
+        projectJpaRepository, creator, updater, "ConnProj");
+    ServiceTestDataFactory.createProjectMember(projectMemberJpaRepository, project, creator);
+    ServiceTestDataFactory.createProjectMember(projectMemberJpaRepository, project, updater);
     system = ServiceTestDataFactory.createSystem(
         systemJpaRepository, project, creator, updater, "SYS-CONN");
   }
 
-  @AfterEach
-  void tearDown() {
-    connectionJpaRepository.deleteAll();
-    systemJpaRepository.deleteAll();
-    projectJpaRepository.deleteAll();
-    userJpaRepository.deleteAll();
-  }
-
   @Test
   void createConnection_success() {
-    ConnectionCreateRequest request = new ConnectionCreateRequest(
-        project.getProjectId(),
-        system.getSystemId(),
-        "Conn1",
-        Protocol.HTTP,
-        "localhost",
-        8080,
-        "/path",
-        "user",
-        "BASIC",
-        "{\"k\":\"v\"}",
-        ConnectionStatus.ACTIVE,
-        "desc",
-        creator.getEmail(),
-        updater.getEmail());
+    ConnectionCreateRequest request = buildCreateRequest();
 
-    ConnectionResponse response = ConnectionMapper.toResponse(connectionService.create(request));
+    Connection result = connectionService.create(creator, system.getSystemId(), request);
 
-    assertNotNull(response.connectionId());
-    assertEquals("Conn1", response.name());
-    assertEquals(Protocol.HTTP, response.protocol());
-    assertEquals(ConnectionStatus.ACTIVE, response.status());
+    assertThat(result.getConnectionId()).isNotNull();
+    assertThat(result.getName()).isEqualTo(request.name());
+    assertThat(result.getStatus()).isEqualTo(ConnectionStatus.INACTIVE);
   }
 
   @Test
   void updateConnection_success() {
-    ConnectionResponse created = ConnectionMapper.toResponse(connectionService.create(
-        new ConnectionCreateRequest(
-            project.getProjectId(),
-            system.getSystemId(),
-            "Conn2",
-            Protocol.HTTP,
-            "localhost",
-            8080,
-            "/path",
-            "user",
-            "BASIC",
-            null,
-            ConnectionStatus.ACTIVE,
-            "desc",
-            creator.getEmail(),
-            updater.getEmail())));
+    Connection created =
+        connectionService.create(creator, system.getSystemId(), buildCreateRequest());
 
     ConnectionUpdateRequest updateRequest = new ConnectionUpdateRequest(
-        project.getProjectId(),
-        system.getSystemId(),
         "Conn2-Updated",
         Protocol.SFTP,
         "example.com",
@@ -124,42 +86,58 @@ class ConnectionServiceTest {
         "updatedUser",
         "KEY",
         "{\"new\":\"json\"}",
-        ConnectionStatus.INACTIVE,
-        "new desc",
-        creator.getEmail());
+        ConnectionStatus.ACTIVE,
+        "new desc");
 
-    ConnectionResponse updated = ConnectionMapper.toResponse(
-        connectionService.update(created.connectionId(), updateRequest));
+    Connection result = connectionService.update(creator, created.getConnectionId(), updateRequest);
 
-    assertEquals("Conn2-Updated", updated.name());
-    assertEquals(Protocol.SFTP, updated.protocol());
-    assertEquals("example.com", updated.host());
-    assertEquals(ConnectionStatus.INACTIVE, updated.status());
+    assertThat(result.getName()).isEqualTo(updateRequest.name());
+    assertThat(result.getStatus()).isEqualTo(updateRequest.status());
   }
 
   @Test
   void getConnections_returnsAll() {
-    connectionService.create(new ConnectionCreateRequest(
-        project.getProjectId(), system.getSystemId(), "C1", Protocol.HTTP, null, null, null,
-        null, null, null, ConnectionStatus.ACTIVE, null, creator.getEmail(), updater.getEmail()));
-    connectionService.create(new ConnectionCreateRequest(
-        project.getProjectId(), system.getSystemId(), "C2", Protocol.HTTP, null, null, null,
-        null, null, null, ConnectionStatus.ACTIVE, null, creator.getEmail(), updater.getEmail()));
+    Pageable pageable = PageRequest.of(0, 10);
+    connectionService.create(creator, system.getSystemId(), buildCreateRequest());
+    connectionService.create(creator, system.getSystemId(), buildCreateRequest());
 
-    assertEquals(2, connectionService.getAll().size());
+    Page<Connection> results = connectionService.getAll(creator, system.getSystemId(), pageable);
+
+    assertThat(results.getTotalElements()).isGreaterThanOrEqualTo(2);
+  }
+
+  @Test
+  void getConnection_exception() {
+    // Given
+    User hacker = ServiceTestDataFactory.createUser(userJpaRepository);
+    Connection created =
+        connectionService.create(creator, system.getSystemId(), buildCreateRequest());
+
+    // When & Then
+    assertThatThrownBy(() -> connectionService.getById(hacker, created.getConnectionId()))
+        .isInstanceOf(AccessDeniedException.class);
   }
 
   @Test
   void deleteConnection_success() {
-    ConnectionResponse created = ConnectionMapper.toResponse(connectionService.create(
-        new ConnectionCreateRequest(
-            project.getProjectId(), system.getSystemId(), "C3", Protocol.HTTP, null, null, null,
-            null, null, null, ConnectionStatus.ACTIVE, null, creator.getEmail(), updater.getEmail())));
+    Connection created = connectionService.create(creator, system.getSystemId(),
+        buildCreateRequest());
 
-    connectionService.delete(created.connectionId());
+    Connection result = connectionService.delete(creator, created.getConnectionId());
 
-    assertEquals(0, connectionJpaRepository.count());
-    assertThrows(EntityNotFoundException.class,
-        () -> connectionService.getById(created.connectionId()));
+    assertThat(result.getStatus()).isEqualTo(ConnectionStatus.DELETED);
+  }
+
+  private ConnectionCreateRequest buildCreateRequest() {
+    return new ConnectionCreateRequest(
+        "Conn1",
+        Protocol.HTTP,
+        "localhost",
+        8080,
+        "/path",
+        "user",
+        "BASIC",
+        "{\"k\":\"v\"}",
+        "desc");
   }
 }

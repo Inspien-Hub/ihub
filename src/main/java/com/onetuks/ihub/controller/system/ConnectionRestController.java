@@ -8,7 +8,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,9 +20,19 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-@RequestMapping("/api/connections")
+@RequestMapping
 @Tag(name = "Connection", description = "Connection management APIs")
 public interface ConnectionRestController {
+
+  @Operation(summary = "List connections")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "Connections listed"),
+      @ApiResponse(responseCode = "500", description = "Internal server error")
+  })
+  @GetMapping("/api/systems/{systemId}/connections")
+  ResponseEntity<Page<ConnectionResponse>> getConnections(
+      @PathVariable String systemId,
+      @PageableDefault Pageable pageable);
 
   @Operation(summary = "Create connection")
   @ApiResponses({
@@ -28,8 +40,9 @@ public interface ConnectionRestController {
       @ApiResponse(responseCode = "400", description = "Invalid request"),
       @ApiResponse(responseCode = "500", description = "Internal server error")
   })
-  @PostMapping
+  @PostMapping("/api/systems/{systemId}/connections")
   ResponseEntity<ConnectionResponse> createConnection(
+      @PathVariable String systemId,
       @Valid @RequestBody ConnectionCreateRequest request);
 
   @Operation(summary = "Get connection by id")
@@ -39,16 +52,9 @@ public interface ConnectionRestController {
       @ApiResponse(responseCode = "404", description = "Connection not found"),
       @ApiResponse(responseCode = "500", description = "Internal server error")
   })
-  @GetMapping("/{connectionId}")
+  @GetMapping("/api/connections/{connectionId}")
   ResponseEntity<ConnectionResponse> getConnection(@PathVariable String connectionId);
 
-  @Operation(summary = "List connections")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Connections listed"),
-      @ApiResponse(responseCode = "500", description = "Internal server error")
-  })
-  @GetMapping
-  ResponseEntity<List<ConnectionResponse>> getConnections();
 
   @Operation(summary = "Update connection")
   @ApiResponses({
@@ -57,7 +63,7 @@ public interface ConnectionRestController {
       @ApiResponse(responseCode = "404", description = "Connection not found"),
       @ApiResponse(responseCode = "500", description = "Internal server error")
   })
-  @PutMapping("/{connectionId}")
+  @PutMapping("/api/connections/{connectionId}")
   ResponseEntity<ConnectionResponse> updateConnection(
       @PathVariable String connectionId,
       @Valid @RequestBody ConnectionUpdateRequest request);
@@ -69,6 +75,6 @@ public interface ConnectionRestController {
       @ApiResponse(responseCode = "404", description = "Connection not found"),
       @ApiResponse(responseCode = "500", description = "Internal server error")
   })
-  @DeleteMapping("/{connectionId}")
+  @DeleteMapping("/api/connetions/{connectionId}")
   ResponseEntity<Void> deleteConnection(@PathVariable String connectionId);
 }

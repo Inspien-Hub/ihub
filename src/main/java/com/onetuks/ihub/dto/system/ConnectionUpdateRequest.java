@@ -4,8 +4,6 @@ import com.onetuks.ihub.entity.system.ConnectionStatus;
 import com.onetuks.ihub.entity.system.Protocol;
 
 public record ConnectionUpdateRequest(
-    String projectId,
-    String systemId,
     String name,
     Protocol protocol,
     String host,
@@ -15,8 +13,7 @@ public record ConnectionUpdateRequest(
     String authType,
     String extraConfig,
     ConnectionStatus status,
-    String description,
-    String updatedById
+    String description
 ) {
 
 }
