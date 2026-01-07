@@ -2,19 +2,16 @@ package com.onetuks.ihub.service.project;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.onetuks.ihub.TestcontainersConfiguration;
 import com.onetuks.ihub.dto.project.ProjectCreateRequest;
 import com.onetuks.ihub.dto.project.ProjectUpdateRequest;
+import com.onetuks.ihub.entity.project.FavoriteProject;
 import com.onetuks.ihub.entity.project.Project;
 import com.onetuks.ihub.entity.project.ProjectStatus;
 import com.onetuks.ihub.entity.user.User;
 import com.onetuks.ihub.entity.user.UserStatus;
 import com.onetuks.ihub.exception.AccessDeniedException;
-import com.onetuks.ihub.repository.ProjectJpaRepository;
 import com.onetuks.ihub.repository.UserJpaRepository;
 import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
@@ -108,6 +105,32 @@ class ProjectServiceTest {
     Project result = projectService.delete(creator, created.getProjectId());
 
     assertThat(result.getStatus()).isEqualTo(ProjectStatus.DELETED);
+  }
+
+  @Test
+  void manageFavorite_added() {
+    // Given
+    Project created = projectService.create(creator, createRequest("Project Delete"));
+
+    // When
+    FavoriteProject result = projectService.manageFavorite(creator, created.getProjectId());
+
+    // Then
+    assertThat(result.getFavoriteProjectId()).isNotNull();
+    assertThat(result.getIsFavorite()).isTrue();
+  }
+
+  @Test
+  void manageFavorite_changed() {
+    // Given
+    Project created = projectService.create(creator, createRequest("Project FAvorite"));
+    projectService.manageFavorite(creator, created.getProjectId());
+
+    // When
+    FavoriteProject result = projectService.manageFavorite(creator, created.getProjectId());
+
+    // Then
+    assertThat(result.getIsFavorite()).isFalse();
   }
 
   private User buildUser(String email, String name) {

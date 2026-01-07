@@ -34,7 +34,7 @@
 - [X] **GET** `/api/projects/my`  _(exclude status=DELETED)_
 - [x] **GET** `/api/projects/{projectId}`  _(exclude status=DELETED)_
 - [x] **PATCH** `/api/projects/{projectId}`
-- [ ] **PATCH** `/api/projects/{projectId}/favorite`
+- [x] **PUT** `/api/projects/{projectId}/favorite`
 
 ## Project Member
 

@@ -1,8 +1,10 @@
 package com.onetuks.ihub.mapper;
 
+import com.onetuks.ihub.dto.project.FavoriteProjectResponse;
 import com.onetuks.ihub.dto.project.ProjectCreateRequest;
 import com.onetuks.ihub.dto.project.ProjectResponse;
 import com.onetuks.ihub.dto.project.ProjectUpdateRequest;
+import com.onetuks.ihub.entity.project.FavoriteProject;
 import com.onetuks.ihub.entity.project.Project;
 import com.onetuks.ihub.entity.project.ProjectStatus;
 import com.onetuks.ihub.entity.user.User;
@@ -31,7 +33,36 @@ public final class ProjectMapper {
         updatedBy.getStatus(),
         updatedBy.getName(),
         project.getCreatedAt(),
-        project.getUpdatedAt());
+        project.getUpdatedAt(),
+        false);
+  }
+
+  public static ProjectResponse toResponse(Project project, boolean isFavorite) {
+    var createdBy = Objects.requireNonNull(project.getCreatedBy());
+    var updatedBy = Objects.requireNonNull(project.getUpdatedBy());
+    return new ProjectResponse(
+        project.getProjectId(),
+        project.getTitle(),
+        project.getDescription(),
+        project.getStartDate(),
+        project.getEndDate(),
+        project.getStatus(),
+        createdBy.getUserId(),
+        createdBy.getStatus(),
+        createdBy.getName(),
+        updatedBy.getUserId(),
+        updatedBy.getStatus(),
+        updatedBy.getName(),
+        project.getCreatedAt(),
+        project.getUpdatedAt(),
+        isFavorite);
+  }
+
+  public static FavoriteProjectResponse toResponse(FavoriteProject favoriteProject) {
+    return new FavoriteProjectResponse(
+        favoriteProject.getFavoriteProjectId(),
+        favoriteProject.getIsFavorite()
+    );
   }
 
   public static Project applyCreate(
@@ -51,7 +82,8 @@ public final class ProjectMapper {
     );
   }
 
-  public static Project applyUpdate(Project project, User currentUser, ProjectUpdateRequest request) {
+  public static Project applyUpdate(Project project, User currentUser,
+      ProjectUpdateRequest request) {
     if (request.title() != null) {
       project.setTitle(request.title());
     }

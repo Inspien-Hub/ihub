@@ -19,7 +19,8 @@ public record ProjectResponse(
     UserStatus currentAdminStatus,
     String currentAdminName,
     LocalDateTime createdAt,
-    LocalDateTime updatedAt
+    LocalDateTime updatedAt,
+    boolean isFavorite
 ) {
 
 }

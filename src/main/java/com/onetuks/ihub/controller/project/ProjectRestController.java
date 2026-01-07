@@ -1,5 +1,6 @@
 package com.onetuks.ihub.controller.project;
 
+import com.onetuks.ihub.dto.project.FavoriteProjectResponse;
 import com.onetuks.ihub.dto.project.ProjectCreateRequest;
 import com.onetuks.ihub.dto.project.ProjectResponse;
 import com.onetuks.ihub.dto.project.ProjectUpdateRequest;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -94,4 +96,16 @@ public interface ProjectRestController {
   })
   @DeleteMapping("/{projectId}")
   ResponseEntity<Void> deleteProject(@PathVariable String projectId);
+
+  @Operation(summary = "프로젝트 삭제(논리삭제)")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "Project deleted"),
+      @ApiResponse(responseCode = "400", description = "Invalid id supplied"),
+      @ApiResponse(responseCode = "401", description = "No Authorization"),
+      @ApiResponse(responseCode = "403", description = "Forbidden"),
+      @ApiResponse(responseCode = "404", description = "Project not found"),
+      @ApiResponse(responseCode = "500", description = "Internal server error")
+  })
+  @PutMapping("/{projectId}/favorite")
+  ResponseEntity<FavoriteProjectResponse> manageFavorite(@PathVariable String projectId);
 }

@@ -3,10 +3,13 @@ package com.onetuks.ihub.controller.project;
 import static com.onetuks.ihub.config.RoleDataInitializer.PROJECT_FULL_ACCESS;
 
 import com.onetuks.ihub.annotation.RequiresRole;
+import com.onetuks.ihub.dto.project.FavoriteProjectResponse;
 import com.onetuks.ihub.dto.project.ProjectCreateRequest;
 import com.onetuks.ihub.dto.project.ProjectResponse;
 import com.onetuks.ihub.dto.project.ProjectUpdateRequest;
+import com.onetuks.ihub.entity.project.FavoriteProject;
 import com.onetuks.ihub.entity.project.Project;
+import com.onetuks.ihub.entity.user.User;
 import com.onetuks.ihub.mapper.ProjectMapper;
 import com.onetuks.ihub.security.CurrentUserProvider;
 import com.onetuks.ihub.service.project.ProjectService;
@@ -46,7 +49,8 @@ public class ProjectRestControllerImpl implements ProjectRestController {
       @PathVariable String projectId
   ) {
     Project result = projectService.getById(currentUserProvider.resolveUser(), projectId);
-    ProjectResponse response = ProjectMapper.toResponse(result);
+    boolean isFavorite = projectService.getFavorited(currentUserProvider.resolveUser(), projectId);
+    ProjectResponse response = ProjectMapper.toResponse(result, isFavorite);
     return ResponseEntity.ok(response);
   }
 
@@ -55,8 +59,12 @@ public class ProjectRestControllerImpl implements ProjectRestController {
   public ResponseEntity<Page<ProjectResponse>> getMyProjects(
       @PageableDefault Pageable pageable
   ) {
-    Page<Project> results = projectService.getAllMine(currentUserProvider.resolveUser(), pageable);
-    Page<ProjectResponse> responses = results.map(ProjectMapper::toResponse);
+    User currentUser = currentUserProvider.resolveUser();
+    Page<Project> results = projectService.getAllMine(currentUser, pageable);
+    Page<ProjectResponse> responses = results.map(project -> {
+      boolean isFavorite = projectService.getFavorited(currentUser, project.getProjectId());
+      return ProjectMapper.toResponse(project, isFavorite);
+    });
     return ResponseEntity.ok(responses);
   }
 
@@ -85,5 +93,14 @@ public class ProjectRestControllerImpl implements ProjectRestController {
   ) {
     projectService.delete(currentUserProvider.resolveUser(), projectId);
     return ResponseEntity.noContent().build();
+  }
+
+  @RequiresRole({PROJECT_FULL_ACCESS})
+  @Override
+  public ResponseEntity<FavoriteProjectResponse> manageFavorite(String projectId) {
+    FavoriteProject result = projectService.manageFavorite(
+        currentUserProvider.resolveUser(), projectId);
+    FavoriteProjectResponse response = ProjectMapper.toResponse(result);
+    return ResponseEntity.ok(response);
   }
 }
